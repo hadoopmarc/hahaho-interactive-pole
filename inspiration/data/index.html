@@ -1,0 +1,337 @@
+readf<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspiration HaHaHo Interactive Pole</title>
+<link rel='stylesheet' type='text/css' href='style.css'>
+</head>
+<body>
+ <audio id="sound" src="audio/stoplicht/treffer_n.mp3" type="audio/mpeg" preload="auto">
+ </audio>
+ <ul> 
+  <li><a class='pull-left active' href='index.html'>Home</a></li> 
+  <li><a class='pull-left' href='config.html'>Config</a></li> 
+  <li><a class='pull-left' href='registraties.html'>Registraties</a></li> 
+  <li><a class='pull-left' href='syslog.html'>Syslog</a></li> 
+  <li><a class='pull-left' href='about.html'>About</a></li> 
+  <li><a class='pull-left' href='logout'>Log out</a></li> 
+ </ul>
+<br><br><br>
+<center>
+ <h1>Inspiration HaHaHo Interactive Pole</h1>
+ <table>
+  <tr>
+   <td>Volgnummer</td>
+   <td>
+    <input size="4" id="vlg" value="0" readonly>
+   </td>
+   <td>
+    <button class="button" onclick="mem('V')">Onthoud</button><br>
+    </td>
+  </tr>
+  <tr>
+    <td>Treffer</td>
+    <td>
+     <input size="4" id="treffer" value="0" readonly>&nbsp om &nbsp
+     <input size="10" id="ttijd" value="00:00:00" readonly>
+    </td>
+    <td>
+     <button class="button" onclick="mem('T')">Onthoud</button><br>
+     </td>
+   </tr>
+   <tr>
+    <td>Trefkans[%]</td>
+    <td>
+     <input type="range" class="slider" min="1" max="50"id="probs" oninput=sfuncp(this)>
+     <input size="4" id="prob" value="20" readonly>
+    </td>
+    <td>
+     <button class="button" onclick="sbut('prob')">Set</button><br>
+     </td>
+   </tr>
+   <tr>
+    <td>Volume[%]</td>
+    <td>
+     <input type="range" class="slider" min="0" max="100"id="volumes" oninput=sfuncv(this)>
+     <input size="4" id="gain" value="20" readonly>
+    </td>
+    <td>
+     <button class="button" onclick="sbut('gain')">Set</button><br>
+     </td>
+   </tr>
+   <tr>
+    <td>Helderheid[%]</td>
+    <td>
+     <input type="range" class="slider" min="0" max="100"id="bri" oninput=sfuncb(this)>
+     <input size="4" id="brightness" value="20" readonly>
+    </td>
+    <td>
+     <button class="button" onclick="sbut('brightness')">Set</button><br>
+     </td>
+   </tr>
+   <tr>
+    <td>Klok</td>
+    <td><input size="10" id="ctime" value="00:00:00" readonly=""></td>
+    <td>
+     <button class="button" onclick="tbut('mtsync')">Sync</button>
+    </td>
+   </tr>
+   <tr>
+    <td>GPS</td>
+    <td>
+      <input size="12" id="gpslat" value="" readonly="">
+      <input size="12" id="gpslon" value="" readonly="">
+    </td>
+    <td>
+      <button class="button" onclick="mbut()">Kaart</button>
+    </td>
+   </tr>
+ </table><br>
+ 
+ 
+ <table>
+   <tr>
+     <td>
+      <table>
+        <tr>
+          <th>Audio</th><th>Nederlands</th><th>Engels</th>
+        </tr>
+        <tr>
+          <td>Volgnummer</td>
+          <td><center><input type="checkbox" id="au_v_ned" onclick="auClick(this)"></center></td>
+          <td><center><input type="checkbox" id="au_v_eng" onclick="auClick(this)"></center></td>
+        </tr>
+        <tr>
+          <td>Teksten</td>
+          <td><center><input type="checkbox" id="au_t_ned" onclick="auClick(this)"></center></td>
+          <td><center><input type="checkbox" id="au_t_eng" onclick="auClick(this)"></center></td>
+        </tr>
+      </table>
+     </td>
+     <td>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+     </td>
+     <td>
+      <table>
+        <tr>
+          <th>Signalering</th>
+        </tr>
+        <tr>
+         <td>
+          <select id="model" onchange="modelChange(this)">
+            <option value="stoplicht">Stoplicht</option>
+            <option value="pijl">Pijl</option>
+          </select>
+         </td>
+        </tr>
+        <tr>
+          <td>
+           <select id="lrrev" onchange="modelChange(this)">
+             <option value="rechts">Rechts uit</option>
+             <option value="links">Links uit</option>
+           </select>
+          </td>
+         </tr>
+       </table>
+   </td>
+ </tr>
+</table>
+ <br><input size="50" id="resultstr" value="Wacht op commando..." readonly><br><br>
+ <h1>Kladblok</h1>
+ <textarea rows=10 cols=50 style="font-size: 80%" id="kladblok"></textarea><br>
+ <button class="button" onclick="wismem()">Wis</button>
+ 
+
+</center>
+<script>
+  var block_update = 0  ;                               // Counter for blocking slider updates
+  var id2 = setInterval ( myRefresh, 2000 ) ;           // Set refresh update rate
+  var lastTreffer = 0 ;
+
+  myRefresh() ;
+
+  function mem(vt)
+  {
+    var alltxt, newtxt ;
+
+    // Zet huidig volgnummer in notitie blok
+    alltxt = kladblok.value ;
+    if ( vt == "V" )
+    {
+      newtxt = "Volgnr  " + vlg.value +
+               " om " + ctime.value + "\n" ;
+    }
+    else
+    {
+      newtxt = "Treffer " + treffer.value +
+               " om " + ttijd.value + "\n" ;
+    }
+    kladblok.value = alltxt + newtxt ;
+  }
+
+  function wismem()
+  {
+    kladblok.value = "" ;
+  }
+
+  function auClick(a)
+  {
+    // Send audio setting command to host
+    var onoff = 0 ;
+    var theUrl ;
+    var xhr = new XMLHttpRequest() ;
+
+    xhr.onreadystatechange = function() {
+      if ( xhr.readyState == XMLHttpRequest.DONE )
+      {
+        resultstr.value = xhr.responseText ;
+      }
+    }
+    if ( a.checked )
+    {
+      onoff = 1 ;
+    }
+    theUrl = "/settings?" + a.id + "=" + onoff ;
+    xhr.open ( "GET", theUrl, false ) ;
+    xhr.send() ;
+  }
+
+  function modelChange(a)
+  {
+    // Send mode setting command to host
+    var theUrl ;
+    var xhr = new XMLHttpRequest() ;
+
+    xhr.onreadystatechange = function() {
+      if ( xhr.readyState == XMLHttpRequest.DONE )
+      {
+        resultstr.value = xhr.responseText ;
+      }
+    }
+    theUrl = "/settings?" + a.id + "=" + a.value ;
+    xhr.open ( "GET", theUrl, false ) ;
+    xhr.send() ;
+  }
+
+  function myRefresh()
+  {
+    // Request for current status
+    // Reply is tijdstip, probability, volgnummer, trefnummer, treftijd,
+    // audio settings (volgnummer, taal),
+    // volume, brightness, signaleringsmode, rechts/links uit
+    var theUrl = "status" + "?version=" + Math.random() ;
+    var xhr = new XMLHttpRequest() ;
+    var values ;
+    var sndid ;
+
+    xhr.onreadystatechange = function() {
+      if ( xhr.readyState == XMLHttpRequest.DONE )
+      {
+       values = xhr.responseText.split ( "|" ) ;
+       ctime.value = values[0] ;
+       if ( block_update == 0 )                 // sliders blocked?
+       {
+        prob.value       = values[1] ;          // No, refresh
+        gain.value       = values[11] ;
+        brightness.value = values[12] ;
+       }
+       vlg.value        = values[2] ;
+       treffer.value    = values[3] ;
+       ttijd.value      = values[4] ;
+       gpslat.value     = values[5] ;
+       gpslon.value     = values[6] ;
+       au_v_ned.checked = ( values[7]  != 0 ) ;
+       au_t_ned.checked = ( values[8]  != 0 ) ;
+       au_v_eng.checked = ( values[9]  != 0 ) ;
+       au_t_eng.checked = ( values[10] != 0 ) ;
+       model.selectedIndex = values[13] ;
+       lrrev.selectedIndex = values[14] ;
+       if ( lastTreffer != treffer.value )
+       {
+         lastTreffer = treffer.value ;
+         if ( lastTreffer != 0 )
+         {
+           sndid = document.getElementById('sound') ;
+           sndid.play() ;
+         }
+       }
+      }
+    }
+    xhr.open ( "GET", theUrl, false ) ;
+    xhr.send() ;
+    if ( block_update > 0 )                     // Count block p update time
+    {
+      block_update-- ;
+    }
+  }
+
+  // Slider function for probability
+  function sfuncp(a)
+  {
+    prob.value = a.value ;
+    block_update = 5 ;                    // Block slider update for some time
+  }
+
+  // Slider function for volume
+  function sfuncv(a)
+  {
+    gain.value = a.value ;
+    block_update = 5 ;                    // Block slider update for some time
+  }
+
+  // Slider function for brightness
+  function sfuncb(a)
+  {
+    brightness.value = a.value ;
+    block_update = 5 ;                    // Block slider update for some time
+  }
+
+  // Send command to host
+  function sbut ( cmd )
+  {
+    var xhr = new XMLHttpRequest() ;
+    xhr.onreadystatechange = function() {
+      if ( xhr.readyState == XMLHttpRequest.DONE )
+      {
+        resultstr.value = xhr.responseText ;
+      }
+    }
+    xhr.open ( "POST", cmd + "?p=" + document.getElementById(cmd).value ) ;
+    xhr.send() ;
+  }
+
+  // Send command to synchronize the RTC
+  function tbut ( cmd )
+  {
+    var today = new Date() ;
+    var mtsync ;                                         // PC time
+    var xhr = new XMLHttpRequest() ;
+
+    xhr.onreadystatechange = function() {
+      if ( xhr.readyState == XMLHttpRequest.DONE )
+      {
+        resultstr.value = xhr.responseText ;
+      }
+    }
+    mtsync = Math.round(today.getTime()/1000) -
+              (today.getTimezoneOffset()*60) ;           // DST correction
+    xhr.open ( "POST", cmd + "?p=" + mtsync ) ;
+    xhr.send() ;
+  }
+
+  // Send command to show a map
+  function mbut()
+  {
+    location.href="https://www.openstreetmap.org/" +
+                  "?mlat=" + gpslat.value +
+                  "&mlon=" + gpslon.value ;
+  }
+
+</script>
+</body>
+</html>
+<noscript>
+  Sorry, Dit werkt niet zonder JavaScript!
+</noscript>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configuratie</title>
+  <link rel='stylesheet' type='text/css' href='style.css'>
+ </head>
+ <body>
+  <ul> 
+    <li><a class='pull-left' href='index.html'>Home</a></li> 
+    <li><a class='pull-left active' href='config.html'>Config</a></li>
+    <li><a class='pull-left' href='registraties.html'>Registraties</a></li>
+    <li><a class='pull-left' href='syslog.html'>Syslog</a></li>
+    <li><a class='pull-left' href='about.html'>About</a></li>
+    <li><a class='pull-left' href='logout'>Log out</a></li>
+   </ul>
+  <center>
+   <h1>** Inspiration HaHaHo Interactive Pole **</h1>
+   <p>Je kunt hier enige instellingen wijzigen.
+     <i>Let op: de meeste instellingen zijn pas actief na herstart.</i>
+   </p>
+   <textarea rows="20" cols="100" id="prefs">Instellingen laden</textarea> 
+   <br>
+   <button class="button" onclick="fsav()">Opslaan</button>
+   &nbsp;&nbsp;
+   <button class="button" onclick="httpGet('reset')">Herstart</button>
+   &nbsp;&nbsp;
+   <br><input type="text" size="80" id="resultstr" placeholder="Wacht op input....">
+   <br>
+   <script>
+     function httpGet ( theReq )
+     {
+       var theUrl = theReq + "?version=" + Math.random() ;
+       var xhr = new XMLHttpRequest() ;
+       xhr.onreadystatechange = function() {
+         if ( xhr.readyState == XMLHttpRequest.DONE )
+         {
+           resultstr.value = xhr.responseText ;
+         }
+       }
+       xhr.open ( "GET", theUrl ) ;
+       xhr.send() ;
+     }
+
+     // Load preferences or default preferences
+     function ldef ( source )
+     {
+       var xhr = new XMLHttpRequest() ;
+       xhr.onreadystatechange = function()
+       {
+         if ( xhr.readyState == XMLHttpRequest.DONE )
+         {
+           prefs.value = xhr.responseText ;
+         }
+       }
+       xhr.open ( "GET", source  + "?version=" + Math.random(), false ) ;
+       xhr.send() ;
+     }
+
+     // Send command to synchronize the RTC
+     function tbut ( cmd )
+     {
+       var xhr = new XMLHttpRequest() ;
+       var today = new Date() ;
+       var mytime ;		                             // Seconds since Epoch
+
+       mytime = Math.round(today.getTime()/1000) -
+                 (today.getTimezoneOffset()*60) ;  // DST correction
+       xhr.onreadystatechange = function() {
+         if ( xhr.readyState == XMLHttpRequest.DONE )
+         {
+           resultstr.value = xhr.responseText ;
+         }
+       }
+       xhr.open ( "POST", cmd + "?t=" + mytime ) ;
+       xhr.send() ;
+     }
+
+          // Save the preferences
+     function fsav()
+     {
+       var str = prefs.value ;
+       var theUrl = "saveprefs?version=" + Math.random() + "&" ;
+       var xhr = new XMLHttpRequest() ;
+       xhr.onreadystatechange = function()
+       {
+         if ( xhr.readyState == XMLHttpRequest.DONE )
+         {
+           resultstr.value = xhr.responseText ;
+         }
+       }
+       // Remove empty lines
+       while ( str.indexOf ( "\r\n\r\n" ) >= 0 )
+       {
+         str = str.replace ( /\r\n\r\n/g, "\r\n" )      
+       }
+       while ( str.indexOf ( "\n\n" ) >= 0 )
+       {
+         str = str.replace ( /\n\n/g, "\n" )      
+       }
+       // Replace newline with delimeter
+       while ( str.indexOf ( "\n" ) >= 0 )
+       {
+         str = str.replace ( "\n", "&" )      
+       }
+       theUrl += str.slice(0,-1) ;				// Chop last ampersand
+       xhr.open ( "POST", theUrl, true ) ;
+       xhr.send ( str + "\n" ) ;
+     }
+     // Fill configuration initially.  Get the configuration parameters from preferences.
+     ldef ( "getprefs" ) ;
+    </script>
+  </body>
+</html>
