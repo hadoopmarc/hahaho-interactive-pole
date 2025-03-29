@@ -1,0 +1,151 @@
+ body { 
+  background-color: lightblue; 
+  font-family: Arial, Helvetica, sans-serif; 
+ } 
+
+ h1 { 
+  color: navy; 
+  margin-left: 20px; 
+  font-size: 150% 
+ } 
+
+ ul { 
+  list-style-type: none; 
+  margin: 0; 
+  margin-left: -10px; 
+  overflow: hidden; 
+  background-color: #2C3E50; 
+  position:fixed; 
+  top:0; 
+  width:100%; 
+  z-index:100; 
+ } 
+
+ li .pull-left { 
+  float: left; 
+ } 
+
+ table { 
+  border-collapse: collapse; 
+ } 
+
+ table, td, th { 
+  border: 1px solid black;
+  vertical-align: center;
+ } 
+
+ li .pull-right { 
+  float: right; 
+ } 
+
+ li a { 
+  display: block; 
+  color: white; 
+  text-align: center; 
+  padding: 14px 16px; 
+  text-decoration: none; 
+ } 
+
+ li a:hover, a.active { 
+  background-color: #111; 
+ } 
+
+ .button { 
+  min-width: 80px; 
+  height: 20px; 
+  background-color: #128F76; 
+  border: none; 
+  color: white; 
+  text-align: center; 
+  text-decoration: none; 
+  display: inline-block; 
+  font-size: 16px; 
+  margin: 4px 2px; 
+  cursor: pointer; 
+  border-radius: 10px; 
+  white-space: nowrap; 
+ } 
+
+ .buttonr {background-color: #D62C1A;} 
+
+ .select { 
+  width: 160px; 
+  height: 28px; 
+  padding: 5px; 
+  background: rgb(255, 255, 255); 
+  font-size: 16px; 
+  line-height: 1; 
+  border: 1; 
+  border-radius: 5px; 
+  -webkit-border-radius: 5px; 
+  -webkit-appearance: none; 
+  border: 1px solid black; 
+  border-radius: 10px; 
+ } 
+
+ input { 
+  font-family: 'Lucida Console', Courier, monospace; 
+  height: 16px; 
+  background: rgb(218, 216, 216); 
+  font-size: 16px; 
+  appearance: none; 
+  box-shadow: none; 
+  border-radius: 5px; 
+  -webkit-border-radius: 5px; 
+  -webkit-appearance: none; 
+  border: 1px solid black; 
+  border-radius: 7px; 
+  padding: 0 0 0 10px; 
+ } 
+
+ input[type=submit] { 
+  width: 200px; 
+  height: 40px; 
+  background-color: #128F76; 
+  border: none; 
+  color: white; 
+  text-align: center; 
+  text-decoration: none; 
+  display: inline-block; 
+  font-size: 16px; 
+  margin: 4px 2px; 
+  cursor: pointer; 
+  border-radius: 5px; 
+ } 
+
+ input[type=checkbox] {
+  -webkit-appearance: none;
+  outline: none;
+  height: 20px;
+  width: 20px;
+  border: 1px solid black;
+  color: black;
+  background-color: lightblue;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+}
+
+input[type=checkbox]:checked {
+  background-color: rgb(182, 42, 42);
+}
+
+ textarea { 
+  border: 1px solid black; 
+  border-radius: 10px; 
+  padding: 5px; 
+  font-family: Courier, 'Lucida Console', monospace; 
+  background-color: white; 
+  resize: none; 
+ }
+
+ .slider {
+    width: 200px;
+    height: 10px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>Registraties Inspiration HaHaHo Interactive Pole</title>
+  <link rel='stylesheet' type='text/css' href='style.css'>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <link rel="Shortcut Icon" type="image/ico" href="favicon.ico">
+  <link rel="stylesheet" type="text/css" href="style.css">
+ </head>
+ <body>
+  <ul>
+   <li><a class='pull-left' href='index.html'>Home</a></li>
+   <li><a class='pull-left' href='config.html'>Config</a></li>
+   <li><a class='pull-left' active href='registraties.html'>Registraties</a></li>
+   <li><a class='pull-left' href='syslog.html'>Syslog</a></li>
+   <li><a class='pull-left' href='about.html'>About</a></li>
+   <li><a class='pull-left' href='logout'>Log out</a></li>
+   </ul>
+  <center>
+   <br><br><br>
+   <h1>** Registraties Inspiration HaHaHo Interactive Pole **</h1>
+   Maak een keuze uit de beschikbare registratiefiles.
+   <br><br>
+   <table id="seltable">
+    <tr>
+      <th>Filenaam</th>
+      <th>Acties</th>
+     </tr>
+   </table>
+   <br><input type="text" size="80" id="resultstr" placeholder="Wacht op input....">
+  </center>
+  <script>
+    var files = [] ;                             // Array with file names
+
+    function show ( i )                          // Show a file
+    {
+      location.href = "/" + files[i] ;           // Go to this page
+    }
+
+    function dwld ( i )
+    {
+      location.href = "/export?file=/" + files[i] ;
+    }
+
+    // Load recent log lines
+    function loadFileNames ( source )
+    {
+     var xhr = new XMLHttpRequest() ;
+     xhr.onreadystatechange = function()
+     {
+      if ( xhr.readyState == XMLHttpRequest.DONE )
+      {
+       files = xhr.responseText.split ( '|' ) ;
+       for ( var i = 0 ; i < files.length ; i++ )
+       {
+        let row = seltable.insertRow ( 1 ) ;
+        let cel1 = row.insertCell ( 0 ) ;
+        let cel2 = row.insertCell ( 1 ) ;
+        cel1.innerHTML = files[i] ;
+        cel2.innerHTML = "<button class='button' onclick='show(" + i + ")'>Toon</button>" +
+                         "<button class='button' onclick='dwld(" + i + ")'>Download</button>" ;
+       }
+       if ( files.length == 0 )
+       {
+         resultstr.value = "Er zijn nog geen registratie files."
+       }
+      }
+     }
+     xhr.open ( "GET", source, false ) ;
+     xhr.send() ;
+    }
+    // Fill selectbox with file names.
+    loadFileNames ( "/regis" ) ;
+  </script>
+ </body>
+</html>
