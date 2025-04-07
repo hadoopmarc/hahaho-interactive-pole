@@ -1,4 +1,5 @@
-Instructions_NearRadar_Sensor
+#technisch overzicht
+
 Electronic parts:
 - ESP-WROOM-32
 - [PCM5102A DAC module for Raspberry Pi](https://www.otronic.nl/nl/wcmcu-5102-module-stereo-dac-digitaal-naar-analoog.html)
