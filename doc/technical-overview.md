@@ -1,3 +1,4 @@
+# Technical overview of hardware and software components
 
 Electronic parts:
 - ESP-WROOM-32
