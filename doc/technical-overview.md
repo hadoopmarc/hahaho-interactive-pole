@@ -1,3 +1,4 @@
+#technisch overzicht
 
 Electronic parts:
 - ESP-WROOM-32
