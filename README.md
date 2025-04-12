@@ -7,11 +7,11 @@ The joined membership of the Hahaho Foundation feels that the remaining prototyp
 
 ![Image](doc/technical-overview.png)
 
-The figure above provides a schematic overview of the entire system (from the [detailed documentation](inspiration/doc/HIP.odt)). The table below shows the connections between the various components and the ESP32 dev board.
+The figure above provides a schematic overview of the entire system (from the [detailed documentation](https://docs.google.com/viewer?url=https://github.com/hadoopmarc/hahaho-interactive-pole/inspiration/doc/HIP.pdf)). The table below shows the connections between the various components and the ESP32 dev board.
 
 ```c
 //***************************************************************************************************
-// Wiring.                                                                                          * 
+// Wiring.                                                                                          *
 // ------------------------------------------------------------------------------------------------ *
 // ESP32dev Signal  Connected to                Remarks                                             *
 // -------- ------  --------------              ----------------------------------------------      *
