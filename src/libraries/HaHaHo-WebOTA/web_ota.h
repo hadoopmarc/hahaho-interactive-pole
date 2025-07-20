@@ -7,7 +7,7 @@ typedef struct Credentials
   char password[17];
 } Credentials;
 
-void ota_setup(Credentials *btnCreds, Credentials *apCreds, Credentials *otaCreds);
+void ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCreds);
 void ota_loop();
 
 #endif // WEB_OTA_H

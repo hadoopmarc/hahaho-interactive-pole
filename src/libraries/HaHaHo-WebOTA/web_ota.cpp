@@ -8,8 +8,8 @@ Uploading new binaries to the ESP32 over Wi-Fi will speed up the development
 #include <ESPmDNS.h>
 #include <Update.h>
 #include <Ticker.h>
-#include "web_ota.h"
-#include "html.h"
+#include <web_ota.h>
+#include <html.h>
 
 WiFiMulti wifiMulti;  // Selects the best of defined possible WiFi networks
 WebServer server(80);
@@ -21,10 +21,10 @@ const char *csrfHeaders[2] = { "Origin", "Host" };
 static bool authenticated = false;
 
 
-void wifiInit(Credentials *btnCreds, Credentials *apCreds) {
+void wifiInit(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
   WiFi.mode(WIFI_STA);
   Serial.println("\nInitializing WiFi");
-  for (int i = 0; i < sizeof(btnCreds) / sizeof(Credentials); i++) {
+  for (int i = 0; i < nbtn; i++) {
     wifiMulti.addAP(btnCreds[i].id, btnCreds[i].password);
   }
   Serial.printf("ESP32 available for OTA updates at: ");
@@ -128,9 +128,9 @@ void everySecond() {
   }
 }
 
-void ota_setup(Credentials *btnCreds, Credentials *apCreds, Credentials *otaCredsPtr) {
+void ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCredsPtr) {
   otaCreds = otaCredsPtr;
-  wifiInit(btnCreds, apCreds);
+  wifiInit(btnCreds, nbtn, apCreds);
   webServerInit();
   tkSecond.attach(1, everySecond);
 }
