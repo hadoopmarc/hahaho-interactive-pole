@@ -23,7 +23,8 @@
 AsyncWebServer server(80);
 
 /* Attach ESP-DASH to AsyncWebServer */
-ESPDash dashboard(server);
+char dashURI[] = "/dash";
+ESPDash dashboard = ESPDash(server, dashURI, true);
 
 /*
   Dashboard Cards
@@ -43,7 +44,8 @@ void setup() {
       return;
   }
   Serial.print("\nIP Address: ");
-  Serial.println(WiFi.localIP());
+  Serial.print(WiFi.localIP());
+  Serial.println(dashURI);
 
   /* Start AsyncWebServer */
   server.begin();

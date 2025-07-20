@@ -8,34 +8,34 @@ Uploading new binaries to the ESP32 over Wi-Fi will speed up the development
 #include <ESPmDNS.h>
 #include <Update.h>
 #include <Ticker.h>
-#include "web_ota.h"
-#include "html.h"
-#include "secrets.h"  // See secrets-example.h for setting passwords outside version source control
+#include <web_ota.h>
+#include <html.h>
 
 WiFiMulti wifiMulti;  // Selects the best of defined possible WiFi networks
 WebServer server(80);
 Ticker tkSecond;
+Credentials *otaCreds;  // Global, so that they can be captured by lambda functions
 uint8_t otaDone = 0;
 
 const char *csrfHeaders[2] = { "Origin", "Host" };
 static bool authenticated = false;
 
 
-void wifiInit() {
+void wifiInit(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
   WiFi.mode(WIFI_STA);
   Serial.println("\nInitializing WiFi");
-  for (int i = 0; i < sizeof(btnCredentials) / sizeof(wifiCredentials); i++) {
-    wifiMulti.addAP(btnCredentials[i].ssid, btnCredentials[i].token);
+  for (int i = 0; i < nbtn; i++) {
+    wifiMulti.addAP(btnCreds[i].id, btnCreds[i].password);
   }
   Serial.printf("ESP32 available for OTA updates at: ");
   if (wifiMulti.run() == WL_CONNECTED) {
     Serial.println(WiFi.localIP());
   } else {
     WiFi.mode(WIFI_AP);
-    WiFi.softAP(apCredentials.ssid, apCredentials.token);
+    WiFi.softAP(apCreds->id, apCreds->password);
     MDNS.begin("esp32");
     Serial.println(WiFi.softAPIP());
-    Serial.printf("No WiFi connection; ESP32 is AP with SSID: %s, PASS: %s\n", apCredentials.ssid, apCredentials.token);
+    Serial.printf("No WiFi connection; ESP32 is AP with SSID: %s, PASS: %s\n", apCreds->id, apCreds->password);
   }
 }
 
@@ -62,7 +62,7 @@ void handleUpdate() {
   }
   HTTPUpload &upload = server.upload();
   if (upload.status == UPLOAD_FILE_START) {
-    authenticated = server.authenticate(OTA_USERNAME, OTA_PASSWORD);
+    authenticated = server.authenticate(otaCreds->id, otaCreds->password);
     if (!authenticated) {
       Serial.println("Authentication fail!");
       otaDone = 0;
@@ -114,7 +114,7 @@ void webServerInit() {
     server.send_P(200, "image/x-icon", favicon_ico_gz, favicon_ico_gz_len);
   });
   server.onNotFound([]() {
-    if (!server.authenticate(OTA_USERNAME, OTA_PASSWORD)) {
+    if (!server.authenticate(otaCreds->id, otaCreds->password)) {
       return server.requestAuthentication();
     }
     server.send(200, "text/html", indexHtml);
@@ -128,8 +128,9 @@ void everySecond() {
   }
 }
 
-void ota_setup() {
-  wifiInit();
+void ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCredsPtr) {
+  otaCreds = otaCredsPtr;
+  wifiInit(btnCreds, nbtn, apCreds);
   webServerInit();
   tkSecond.attach(1, everySecond);
 }
