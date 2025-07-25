@@ -1,10 +1,12 @@
 /*
 Uploading new binaries to the ESP32 over Wi-Fi will speed up the development
 */
+!!! Currently broken, see https://github.com/me-no-dev/ESPAsyncWebServer/issues/542 for migration
+and the separate webAuth script
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>  // Install "ESP Aync WebServer" and "Async TCP" by ESP32Async
 #include <ESPmDNS.h>
 #include <Update.h>
 #include <Ticker.h>
@@ -12,7 +14,7 @@ Uploading new binaries to the ESP32 over Wi-Fi will speed up the development
 #include <html.h>
 
 WiFiMulti wifiMulti;  // Selects the best of defined possible WiFi networks
-WebServer server(80);
+AsyncWebServer server(80);
 Ticker tkSecond;
 Credentials *otaCreds;  // Global, so that they can be captured by lambda functions
 uint8_t otaDone = 0;
@@ -131,13 +133,13 @@ void everySecond() {
   }
 }
 
-void ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCredsPtr) {
+void web_ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCredsPtr) {
   otaCreds = otaCredsPtr;
   wifiInit(btnCreds, nbtn, apCreds);
   webServerInit();
   tkSecond.attach(1, everySecond);
 }
 
-void ota_loop() {
-  server.handleClient();
-}
+// void web_ota_loop() {
+//   server.handleClient();
+// }
