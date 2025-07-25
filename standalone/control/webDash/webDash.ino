@@ -13,7 +13,7 @@
 
   This can be used for the Interactive Pole to monitor sensor readings.
 */
-
+#include <arduino.h>            // Only relevant for VSCode/PlatformIO Intellisense
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>  // Install "ESP Aync WebServer" and "Async TCP" by ESP32Async
 #include <ESPDash.h>
