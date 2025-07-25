@@ -1,4 +1,8 @@
 dev/**
+.pio
+.vscode/
+**/*.DS_Store
+**/secrets.h
 
 # Prerequisites
 *.d
@@ -52,6 +56,3 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-
-**/*.DS_Store
-**/secrets.h

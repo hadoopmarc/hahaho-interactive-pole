@@ -1,6 +1,7 @@
 /*
 Uploading new binaries to the ESP32 over Wi-Fi will speed up the development
 */
+#include <arduino.h>                             // Only relevant for VSCode/PlatformIO Intellisense
 #include <web_ota.h>                             // From src/libraries installed in Arduino/Platform libraries
 #include "secrets.h"
 

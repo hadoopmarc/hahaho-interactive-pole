@@ -113,11 +113,14 @@ void webServerInit() {
     server.sendHeader("Content-Encoding", "gzip");
     server.send_P(200, "image/x-icon", favicon_ico_gz, favicon_ico_gz_len);
   });
-  server.onNotFound([]() {
+  server.on("/update", HTTP_GET, []() {
     if (!server.authenticate(otaCreds->id, otaCreds->password)) {
       return server.requestAuthentication();
     }
     server.send(200, "text/html", indexHtml);
+  });
+  server.onNotFound([]() {
+    server.send(404, "text/plain", "Not found, try /update");
   });
   server.begin();
 }
