@@ -7,7 +7,7 @@ Electronic parts
 - 2 x loudspeaker 5W
 - microswitch
 - microphone
-- [2 x HC-SR501 PIR sensor module](https://nl.aliexpress.com/item/1005006834678128.html)
+- [2 x HC-SR501 PIR sensor module](https://nl.aliexpress.com/item/1005006834678128.html or https://nl.aliexpress.com/item/1005006227628663.html)
 - (GPS module Ublox Neo 6M)
 - PCB, including 12V to 5V power supply
 - 12V accu
