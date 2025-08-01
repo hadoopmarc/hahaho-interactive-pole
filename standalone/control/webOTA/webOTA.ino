@@ -13,12 +13,11 @@ int ledState = LOW;                              // state of the LED to be negat
 void setup() {
   Serial.begin(115200);
   pinMode(led, OUTPUT);
+  // This includes setup of a Wi-Fi connection and a webserver with an /update page
   web_ota_setup(btnCredentials, sizeof(btnCredentials) / sizeof(Credentials), &apCredentials, &otaCredentials);
 }
 
 void loop() {
-  // ota_loop();
-
   // blink internal LED
   digitalWrite(led, ledState);
   ledState = not(ledState);

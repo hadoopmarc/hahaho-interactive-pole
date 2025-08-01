@@ -1,27 +1,21 @@
 /*
 Uploading new binaries to the ESP32 over Wi-Fi will speed up the development
+
+Based on:
+https://github.com/IPdotSetAF/ESPAsyncHTTPUpdateServer/blob/master/examples/simple_server/simple_server.ino
 */
-!!! Currently broken, see https://github.com/me-no-dev/ESPAsyncWebServer/issues/542 for migration
-and the separate webAuth script
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <ESPAsyncWebServer.h>  // Install "ESP Aync WebServer" and "Async TCP" by ESP32Async
+#include <ESPAsyncHTTPUpdateServer.h>  // Install ESPAsyncHTTPUpdateServer by ipdotsetaf
 #include <ESPmDNS.h>
 #include <Update.h>
-#include <Ticker.h>
 #include <web_ota.h>
-#include <html.h>
 
 WiFiMulti wifiMulti;  // Selects the best of defined possible WiFi networks
 AsyncWebServer server(80);
-Ticker tkSecond;
-Credentials *otaCreds;  // Global, so that they can be captured by lambda functions
-uint8_t otaDone = 0;
-
-const char *csrfHeaders[2] = { "Origin", "Host" };
-static bool authenticated = false;
-
+ESPAsyncHTTPUpdateServer updateServer;
 
 void wifiInit(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
   WiFi.mode(WIFI_STA);
@@ -29,117 +23,39 @@ void wifiInit(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
   for (int i = 0; i < nbtn; i++) {
     wifiMulti.addAP(btnCreds[i].id, btnCreds[i].password);
   }
-  Serial.printf("ESP32 available for OTA updates at: ");
   if (wifiMulti.run() == WL_CONNECTED) {
-    Serial.println(WiFi.localIP());
+    Serial.printf("ESP32 available for OTA updates at: ");
+    Serial.print(WiFi.localIP());
+    Serial.println("/update");
   } else {
     WiFi.mode(WIFI_AP);
     WiFi.softAP(apCreds->id, apCreds->password);
     MDNS.begin("esp32");
-    Serial.println(WiFi.softAPIP());
+    Serial.printf("ESP32 available for OTA updates at: ");
+    Serial.print(WiFi.softAPIP());
+    Serial.println("/update");
     Serial.printf("No WiFi connection; ESP32 is AP with SSID: %s, PASS: %s\n", apCreds->id, apCreds->password);
   }
 }
 
-void handleUpdateEnd() {
-  if (!authenticated) {
-    return server.requestAuthentication();
-  }
-  server.sendHeader("Connection", "close");
-  if (Update.hasError()) {
-    server.send(502, "text/plain", Update.errorString());
-  } else {
-    server.sendHeader("Refresh", "10");
-    server.sendHeader("Location", "/");
-    server.send(307);
-    delay(500);
-    ESP.restart();
-  }
-}
-
-void handleUpdate() {
-  size_t fsize = UPDATE_SIZE_UNKNOWN;
-  if (server.hasArg("size")) {
-    fsize = server.arg("size").toInt();
-  }
-  HTTPUpload &upload = server.upload();
-  if (upload.status == UPLOAD_FILE_START) {
-    authenticated = server.authenticate(otaCreds->id, otaCreds->password);
-    if (!authenticated) {
-      Serial.println("Authentication fail!");
-      otaDone = 0;
-      return;
-    }
-    String origin = server.header(String(csrfHeaders[0]));
-    String host = server.header(String(csrfHeaders[1]));
-    String expectedOrigin = String("http://") + host;
-    if (origin != expectedOrigin) {
-      Serial.printf("Wrong origin received! Expected: %s, Received: %s\n", expectedOrigin.c_str(), origin.c_str());
-      authenticated = false;
-      otaDone = 0;
-      return;
-    }
-
-    Serial.printf("Receiving Update: %s, Size: %d\n", upload.filename.c_str(), fsize);
-    if (!Update.begin(fsize)) {
-      otaDone = 0;
-      Update.printError(Serial);
-    }
-  } else if (authenticated && upload.status == UPLOAD_FILE_WRITE) {
-    if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-      Update.printError(Serial);
-    } else {
-      otaDone = 100 * Update.progress() / Update.size();
-    }
-  } else if (authenticated && upload.status == UPLOAD_FILE_END) {
-    if (Update.end(true)) {
-      Serial.printf("Update Success: %u bytes\nRebooting...\n", upload.totalSize);
-    } else {
-      Serial.printf("%s\n", Update.errorString());
-      otaDone = 0;
-    }
-  }
-}
-
-void webServerInit() {
-  server.collectHeaders(csrfHeaders, 2);
-  server.on(
-    "/update", HTTP_POST,
-    []() {
-      handleUpdateEnd();
-    },
-    []() {
-      handleUpdate();
-    });
-  server.on("/favicon.ico", HTTP_GET, []() {
-    server.sendHeader("Content-Encoding", "gzip");
-    server.send_P(200, "image/x-icon", favicon_ico_gz, favicon_ico_gz_len);
+void web_ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCreds) {
+  wifiInit(btnCreds, nbtn, apCreds);
+  updateServer.setup(&server, "/update", otaCreds->id, otaCreds->password);
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", "Use /update to enter the update page!");
   });
-  server.on("/update", HTTP_GET, []() {
-    if (!server.authenticate(otaCreds->id, otaCreds->password)) {
-      return server.requestAuthentication();
+  server.onNotFound(
+    [](AsyncWebServerRequest *request) {
+      request->send(404, "text/plain", "Not found");
     }
-    server.send(200, "text/html", indexHtml);
-  });
-  server.onNotFound([]() {
-    server.send(404, "text/plain", "Not found, try /update");
-  });
+  );
+  updateServer.onUpdateBegin = [](const UpdateType type, int &result)
+  {
+      Serial.println("Update started : " + String(type));
+  };
+  updateServer.onUpdateEnd = [](const UpdateType type, int &result)
+  {
+      Serial.println("Update finished : " + String(type) + " result: " + String(result));
+  };
   server.begin();
 }
-
-void everySecond() {
-  if (otaDone > 1) {
-    Serial.printf("ota: %d%%\n", otaDone);
-  }
-}
-
-void web_ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCredsPtr) {
-  otaCreds = otaCredsPtr;
-  wifiInit(btnCreds, nbtn, apCreds);
-  webServerInit();
-  tkSecond.attach(1, everySecond);
-}
-
-// void web_ota_loop() {
-//   server.handleClient();
-// }
