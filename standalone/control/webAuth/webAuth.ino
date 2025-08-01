@@ -5,6 +5,8 @@
 //
 // Authentication and authorization middlewares
 //
+// For the firmware updates in webOTA, authentication is already included
+// The code below would only be necessary to authenticate for other pages
 
 #include <Arduino.h>
 #include <WiFi.h>

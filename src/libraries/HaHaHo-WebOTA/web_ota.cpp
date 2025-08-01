@@ -14,7 +14,6 @@ https://github.com/IPdotSetAF/ESPAsyncHTTPUpdateServer/blob/master/examples/simp
 #include <web_ota.h>
 
 WiFiMulti wifiMulti;  // Selects the best of defined possible WiFi networks
-AsyncWebServer server(80);
 ESPAsyncHTTPUpdateServer updateServer;
 
 void wifiInit(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
@@ -38,7 +37,7 @@ void wifiInit(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
   }
 }
 
-void web_ota_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCreds) {
+void web_ota_setup(AsyncWebServer& server, Credentials *btnCreds, int nbtn, Credentials *apCreds, Credentials *otaCreds) {
   wifiInit(btnCreds, nbtn, apCreds);
   updateServer.setup(&server, "/update", otaCreds->id, otaCreds->password);
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
