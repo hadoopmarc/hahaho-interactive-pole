@@ -14,7 +14,7 @@ Now your sketch can have the following statements:
 
 Instead of copying the files, it is possible to create a symbolic link from a library in the Arduino libraries folder to corresponding library in the git repo libraries folder. Using an "as administrator" CMD terminal in Microsoft Windows:
 ```bat
-mklink /d c:\Users\username\Documents\Arduino\libraries\HaHaHo-WebOTA c:\Users\username\Projects\hahaho-interactive-pole\src\libraries\HaHaHo-WebOTA
+mklink /d c:\Users\username\Documents\Arduino\libraries\Interactive-Pole-Utils c:\Users\username\Projects\hahaho-interactive-pole\src\libraries\Interactive-Pole-Utils
 ```
 
 ## Use in Platform IO
