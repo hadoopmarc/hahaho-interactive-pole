@@ -1,0 +1,14 @@
+{
+    "name": "Interactive Pole Utils",
+    "version": "0.1.0",
+    "description": "Various utilities to ease making small sketches for the Interactive Pole",
+    "keywords": ["WiFi", "OTA", "Secrets"],
+    "repository":{
+        "type": "git",
+        "url": "https://github.com/hadoopmarc/hahaho-interactive-pole/src/Libraries/Interactive-Pole-Utils"
+    },
+    "dependencies" : {
+	    "ipdotsetaf/ESPAsyncHTTPUpdateServer": "^3.0.0"
+    },
+    "platforms": "atmelavr, espressif32"
+}

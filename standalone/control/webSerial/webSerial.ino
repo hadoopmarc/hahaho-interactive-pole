@@ -9,7 +9,9 @@ Simple demo how to use Webserial on ESP32:
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>  // Install "ESP Aync WebServer" and "Async TCP" by ESP32Async
 #include <AsyncWebSerial.h>     // Install "AsyncWebSerial" by Sessa
-#include "secrets.h"
+// See src/libraries/README.md for use in Arduino IDE
+#include <secrets.h>
+#include <pole_wifi.h>
 
 AsyncWebSerial webSerial;
 AsyncWebServer server(80);
@@ -19,18 +21,8 @@ int i = 0;  // Used for progressing output
 
 void setup() {
   Serial.begin(115200);
-
-  /* Connect WiFi */
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, PASSWORD);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serial.printf("WiFi Failed!\n");
-      return;
-  }
-  Serial.print("\nIP Address: ");
-  Serial.print(WiFi.localIP());
-  Serial.println("/webserial");
-
+  wifi_setup(btnCredentials, btnCredsSize, &apCredentials);
+  Serial.println("Open webpage at /webserial");
   webSerial.begin(&server);
   server.begin();
 }
