@@ -14,10 +14,11 @@
   This can be used for the Interactive Pole to monitor sensor readings.
 */
 #include <arduino.h>            // Only relevant for VSCode/PlatformIO Intellisense
-#include <WiFi.h>
 #include <ESPAsyncWebServer.h>  // Install "ESP Aync WebServer" and "Async TCP" by ESP32Async
 #include <ESPDash.h>
-#include "secrets.h"
+// See src/libraries/README.md for use in Arduino IDE
+#include <secrets.h>
+#include <pole_wifi.h>
 
 /* Start Webserver */
 AsyncWebServer server(80);
@@ -35,17 +36,8 @@ dash::HumidityCard humidity(dashboard, "Humidity");
 
 void setup() {
   Serial.begin(115200);
-
-  /* Connect WiFi */
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, PASSWORD);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serial.printf("WiFi Failed!\n");
-      return;
-  }
-  Serial.print("\nIP Address: ");
-  Serial.print(WiFi.localIP());
-  Serial.println(dashURI);
+  wifi_setup(btnCredentials, btnCredsSize, &apCredentials);
+  Serial.printf("Open webpage at %s\n", dashURI);
 
   /* Start AsyncWebServer */
   server.begin();

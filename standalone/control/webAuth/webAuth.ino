@@ -9,9 +9,10 @@
 // The code below would only be necessary to authenticate for other pages
 
 #include <Arduino.h>
-#include <WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include "secrets.h"
+// See src/libraries/README.md for use in Arduino IDE
+#include <secrets.h>
+#include <pole_wifi.h>
 
 static AsyncWebServer server(80);
 
@@ -45,17 +46,7 @@ static AsyncAuthorizationMiddleware authz([](AsyncWebServerRequest *request) {
 
 void setup() {
   Serial.begin(115200);
-
-    /* Connect WiFi */
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, PASSWORD);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serial.printf("WiFi Failed!\n");
-      return;
-  }
-  Serial.print("\nIP Address: ");
-  Serial.print(WiFi.localIP());
-  // Serial.println("/?????");
+  wifi_setup(btnCredentials, btnCredsSize, &apCredentials);
 
   // basic authentication
   basicAuth.setUsername("admin");
