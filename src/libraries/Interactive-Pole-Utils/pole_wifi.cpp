@@ -1,11 +1,12 @@
 /*
-
+General utility to connect to the best of specified WiFi networks and fallback to
+serve as an access point if not network is available.
 */
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <pole_wifi.h>
 
-WiFiMulti wifiMulti;  // Selects the best of defined possible WiFi networks
+WiFiMulti wifiMulti;
 
 void wifi_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
   IPAddress ip;
@@ -21,7 +22,7 @@ void wifi_setup(Credentials *btnCreds, int nbtn, Credentials *apCreds) {
     WiFi.softAP(apCreds->id, apCreds->password);
     ip = WiFi.softAPIP();
   }
-  Serial.printf("ESP32 available at: %s\n", ip);
+  Serial.printf("ESP32 available at: %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
   if (WiFi.status() != WL_CONNECTED) {
     Serial.printf("No WiFi connection; ESP32 is AP with SSID: %s, PASS: %s\n", apCreds->id, apCreds->password);
   }

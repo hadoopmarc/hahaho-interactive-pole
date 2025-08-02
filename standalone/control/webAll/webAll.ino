@@ -6,9 +6,10 @@ with handlers for multiple pages.
 #include <AsyncWebSerial.h>                // Install "AsyncWebSerial" by Sessa
 #include <ESPAsyncWebServer.h>             // Install "ESP Aync WebServer" and "Async TCP" by ESP32Async
 #include <ESPDash.h>
+// See src/libraries/README.md for use in Arduino IDE
+#include <secrets.h>
 #include <pole_wifi.h>
-#include <web_ota.h>                       // From src/libraries installed in Arduino/Platform libraries
-#include "secrets.h"
+#include <web_ota.h>
 
 char dashURI[] = "/dash";
 char serialURI[] = "/serial";
@@ -43,7 +44,7 @@ void setup() {
   pinMode(led, OUTPUT);
 
   // Library setup voor OTA updates and webSerial monitoring
-  wifi_setup(btnCredentials, sizeof(btnCredentials) / sizeof(Credentials), &apCredentials);
+  wifi_setup(btnCredentials, btnCredsSize, &apCredentials);
   web_ota_setup(server, &otaCredentials);
   webSerial.begin(&server);
 

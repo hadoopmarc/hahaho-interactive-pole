@@ -2,7 +2,7 @@ dev/**
 .pio
 .vscode/
 **/*.DS_Store
-**/secrets.h
+**/secrets.*
 
 # Prerequisites
 *.d
