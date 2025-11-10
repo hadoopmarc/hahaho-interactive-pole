@@ -1,251 +1,142 @@
-#include <NeoPixelBus.h> 
+/*
+This is the version provided by Herman. For inclusion in the Interactive Pole, the following
+still has to be done:
+ - rotate the moving characters by 90 degrees for a vertical display
+ - port the webserver to the ESPAsyncWebServer used by the rest of the project
+*/
+#include <WiFi.h>
+#include <WebServer.h>
+#include <WiFiManager.h>
+#include <FastLED.h>
+#include <FastLED_NeoMatrix.h>
 
-// Neopixel displays (2x3 modules 8x8)
-#define NEO_PANELS        8                                 // Number of panels
-#define NEOPIX_PIN        12                                // GPIO for Neopixel displays
-#define NEOPIX_COUNT      512                               // Total number of pixels
+// -- OBJECTEN & CONFIGURATIE --
+WebServer server(80); 
 
-// Neopixel stuff
-NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> neodisp(NEOPIX_COUNT, NEOPIX_PIN);
-RgbColor          n_white = RgbColor ( 255, 255, 255 ) ; // Colors used for Neopixels
-RgbColor          n_black = RgbColor ( 0,     0,   0 ) ; // All colors off
-RgbColor          n_red   = RgbColor ( 255,   0,   0 ) ; // Red
-RgbColor          n_green = RgbColor ( 0,   255,   0 ) ; // Green
-RgbColor          n_blue  = RgbColor ( 0,     0, 255 ) ; // Blue
-uint8_t           n_brightness = 30 ;                    // Brightness 0..100
+#define LED_PIN 13
+// << WIJZIGING 1: De totale breedte is nu 64 pixels >>
+const uint16_t matrix_width = 64; 
+const uint16_t matrix_height = 8;
+const uint16_t NUM_LEDS = matrix_width * matrix_height; // Dit wordt nu automatisch 512
 
+// -- GLOBALE VARIABELEN --
+String displayText = "WiFi Connected!";
+int scrollSpeed = 60;
+int x_pos;
+unsigned long previousScrollTime = 0;
 
+uint8_t currentBrightness = 30;
+CRGB currentColor = CRGB::OrangeRed;
+
+CRGB leds[NUM_LEDS]; // Deze array is nu automatisch 512 LEDs groot
+
+// << WIJZIGING 2: Vertel de matrix zijn NIEUWE totale afmetingen >>
+// We gebruiken nu de variabelen, wat netter is.
+FastLED_NeoMatrix matrix(leds, matrix_width, matrix_height, 1, 1, 
+                        NEO_MATRIX_TOP + NEO_MATRIX_LEFT + NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG);
+
+// Functie om 24-bit CRGB kleur om te zetten naar 16-bit RGB565
+uint16_t convertCRGBtoRGB565(const CRGB &c) {
+    return ((c.r & 0xF8) << 8) | ((c.g & 0xFC) << 3) | (c.b >> 3);
+}
+
+// Genereert de HTML voor de webpagina
+String generateHTML() {
+    // Deze functie hoeft NIET aangepast te worden.
+    String html = R"rawliteral(
+    <!DOCTYPE html><html><head><title>ESP32 Matrix Editor</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px;display:flex;justify-content:center}.container{background-color:white;padding:30px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.1);max-width:500px;width:100%}h1{color:#333;text-align:center}form{display:flex;flex-direction:column;gap:20px}label{font-weight:bold;color:#555}input[type=text],input[type=color],input[type=range]{width:100%;padding:12px;border-radius:5px;border:1px solid #ccc;box-sizing:border-box}input[type=color]{height:50px;padding:5px}input[type=submit]{background-color:#007bff;color:white;padding:15px;border:none;border-radius:5px;cursor:pointer;font-size:16px;transition:background-color .3s}input[type=submit]:hover{background-color:#0056b3}.range-container{display:flex;align-items:center;gap:15px}#brightness-value{font-weight:bold}</style></head><body><div class="container"><h1>LED Matrix Editor</h1><form action="/set" method="POST"><div><label for="text">Tekst:</label><input type="text" id="text" name="text" value="%TEXT%"></div><div><label for="color">Kleur:</label><input type="color" id="color" name="color" value="%COLOR%"></div><div class="range-container"><label for="brightness">Helderheid:</label><input type="range" id="brightness" name="brightness" min="5" max="200" value="%BRIGHTNESS%" oninput="document.getElementById('brightness-value').innerText=this.value"><span id="brightness-value">%BRIGHTNESS%</span></div><input type="submit" value="Update Display"></form></div></body></html>
+    )rawliteral";
+
+    html.replace("%TEXT%", displayText);
+    html.replace("%BRIGHTNESS%", String(currentBrightness));
+    char hexColor[8];
+    sprintf(hexColor, "#%06X", (currentColor.r << 16) | (currentColor.g << 8) | currentColor.b);
+    html.replace("%COLOR%", String(hexColor));
+    return html;
+}
+
+// Functies om de web requests af te handelen
+void handleRoot() {
+    server.send(200, "text/html", generateHTML());
+}
+
+void handleSet() {
+    if (server.hasArg("text")) {
+        displayText = server.arg("text");
+        if (displayText == "") displayText = " ";
+        // Deze regel pakt nu automatisch de nieuwe breedte van 64
+        x_pos = matrix.width(); 
+    }
+    if (server.hasArg("brightness")) {
+        currentBrightness = server.arg("brightness").toInt();
+        FastLED.setBrightness(currentBrightness);
+    }
+    if (server.hasArg("color")) {
+        String colorStr = server.arg("color");
+        long number = (long)strtol(&colorStr[1], NULL, 16);
+        currentColor = CRGB(number);
+        matrix.setTextColor(convertCRGBtoRGB565(currentColor));
+    }
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+// Non-blocking scrolling text function
+void drawScrollingText() {
+    unsigned long currentTime = millis();
+    if (currentTime - previousScrollTime >= scrollSpeed) {
+        previousScrollTime = currentTime;
+        
+        matrix.fillScreen(0);
+        // Deze regel is aangepast (van 7 naar 0) in ons vorige gesprek
+        matrix.setCursor(x_pos, 0); 
+        matrix.print(displayText);
+        
+        // Deze 'if' statement werkt nu automatisch met de nieuwe breedte van 64
+        if (--x_pos < -(int)(displayText.length() * 6)) {
+            x_pos = matrix.width(); // matrix.width() is nu 64
+        }
+        
+        matrix.show();
+        FastLED.show();
+    }
+}
+
+// -- SETUP & LOOP --
 void setup() {
-  // put your setup code here, to run once:
+    Serial.begin(115200);
 
+    // FastLED is nu geconfigureerd voor 512 LEDs
+    FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
+    FastLED.setBrightness(currentBrightness);
+    FastLED.clear();
+
+    // Matrix is nu geconfigureerd voor 64x8
+    matrix.begin();
+    matrix.setTextWrap(false);
+    matrix.setTextColor(convertCRGBtoRGB565(currentColor));
+    matrix.setFont();
+    x_pos = matrix.width(); // x_pos start nu op 64
+
+    // Start WiFiManager
+    WiFiManager wm;
+    // wm.resetSettings(); 
+    if (!wm.autoConnect("ESP32-Matrix-Setup")) {
+        Serial.println("Failed to connect and hit timeout");
+        ESP.restart();
+    }
+    
+    Serial.println("\nWiFi verbonden!");
+    Serial.print("IP-adres: ");
+    Serial.println(WiFi.localIP());
+
+    // Start de webserver
+    server.on("/", HTTP_GET, handleRoot);
+    server.on("/set", HTTP_POST, handleSet);
+    server.begin();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
-}
-
-
-//**************************************************************************************************
-//                                       S H O W C H A R                                           *
-//**************************************************************************************************
-// Show a digit (or special character) on the display.  Pos is the position ( 0..NEO_PANEL-1 ).    *
-// dig is the digit(0..9) for decimal digits. C_X shows "X", C_DOWN shows "V", C_UP shows "^",     *
-// C_RIGHT shows ">" and C_LEFT shows "<".                                                         *
-// tcolor is the text color, br is the brightness (0..100).                                        *
-// Characters are separated by 2 black pixels                                                      *
-//**************************************************************************************************
-void showchar ( uint8_t pos, uint8_t dig, RgbColor &tcolor, uint8_t br )
-{
-  uint64_t patt  = charset[dig] ;                         // Get pattern for this digit
-  uint64_t mask  = 0x8000000000000000 ;
-  uint16_t pix   = pos * 80 ;                             // Pixel to change
-  RgbColor tc    = tcolor.Dim ( br * 255 / 100 ) ;        // Scale text color for brightness
-
-  if ( pos >= 3 )                                         // Backside panel (3..6)?
-  {
-    pix += 16 ;                                           // Yes, correction backside
-  }
-  while ( mask )                                          // Loop for 64 bits
-  {
-    if ( patt & mask )                                    // Bit set?
-    {
-      neodisp.SetPixelColor ( pix, tc ) ;                 // Yes, apply text color
-    }
-    else
-    {
-      neodisp.SetPixelColor ( pix, n_black ) ;           // No, set to background color
-    }
-    mask >>= 1 ;                                         // Shift mask
-    pix++ ;                                              // Next pixel
-  }
-  neodisp.Show() ;                                       // Output pattern
-}
-
-
-//**************************************************************************************************
-//                                 S H O W N E O B U T T O N                                       *
-//**************************************************************************************************
-// Show an iconic button on the frontside of the panel.                                            *
-// The top 2 slots (160 pixels) are reserver for the down arrow (animated), the 3rd slot, pixels   *
-// 160..239 will be filled by animated down arrow.                                                 *
-//**************************************************************************************************
-void showNeoButton()
-{
-  RgbColor  color = RgbColor(128) ;               // Color to display, mostly grey
-  RgbColor  bcolor = n_red ;
-  RgbColor  rc ;                                  // Scaled red
-  uint16_t  pix ;                                 // Pixel to change color to red
-
-  showchar ( 2, C_BUT, color, n_brightness ) ;    // Show button in grey
-  rc = bcolor.Dim ( n_brightness * 255 / 100 ) ;  // Scale red color for brightness
-  for ( pix = 160 ; pix < 192 ; pix++ )           // Change color to red upper half
-  {
-    if ( neodisp.GetPixelColor ( pix ) != 0 )     // Only if not black
-    {
-      neodisp.SetPixelColor ( pix, rc ) ;         // Change one pixel from grey to red
-    }
-  }
-  showchar ( 0, C_DOWN, n_white, n_brightness ) ; // Show arrow at top
-  showchar ( 1, C_DOWN, n_white, 0 ) ;            // And blank in middle slot
-}
-
-
-//**************************************************************************************************
-//                                 A N I M A T E A R R O W                                         *
-//**************************************************************************************************
-// Animate the top 2 slots of the frontside panel.                                                 *
-//**************************************************************************************************
-void animateArrow()
-{
-  neodisp.RotateRight ( 8, 0, 159 ) ;              // Rotate 16 rows
-  neodisp.Show() ;
-}
-
-
-//**************************************************************************************************
-//                                     S H O W N E O N U M                                         *
-//**************************************************************************************************
-// Show a 3 digit number on 3 backside panels.                                                     *
-//**************************************************************************************************
-void showNeoNum ( int v, RgbColor tcolor )
-{
-  for ( uint8_t i = 5 ; i >= 3 ; i-- )       // Display on 3 panels: 5, 4, 3
-  {
-    showchar ( i, v % 10,                    // Show red/green character
-               tcolor, n_brightness ) ;
-    v = v / 10 ;                             // Next digit
-    if ( v == 0 )                            // Is next digit significant?
-    {
-      tcolor = n_black ;                     // No, force invisible character
-    }
-  }
-}
-
-
-//**************************************************************************************************
-//                                     S H O W N E O S Y M                                         *
-//**************************************************************************************************
-// Show hit or no-hit symbol on 3 panels.                                                          *
-//**************************************************************************************************
-void showNeoSym ( bool hit )
-{
-
-  RgbColor          color = n_white ;                           // Color to display, assume white
-  uint8_t           symbol ;                                    // Symbol to display
-
-  if ( hit )                                                    // A hit?
-  {
-    color = n_red ;                                             // Color will be red
-    if ( model == PIJL )                                        // Yes, PIJL model?
-    {
-      if ( lr == RECHTS )                                       // Right out on no-hit?
-      {
-        symbol = C_LEFT ;                                       // Yes, symbol will be "<"
-      }
-      else
-      {
-        symbol = C_RIGHT ;                                      // right out on hit
-      }
-    }
-    else
-    {
-      symbol = C_X ;                                            // STOPLICHT, show cross
-    }
-  }
-  else                                                           // No hit
-  {
-    color = n_green ;                                           // Color will be green
-    if ( model == PIJL )                                        // No hit, mode is PIJL?
-    {
-      if ( lr == RECHTS )                                       // Right out on no-hit?
-      {
-        symbol = C_RIGHT ;                                      // Yes, symbol will be ">"
-      }
-      else
-      {
-        symbol = C_LEFT ;                                       // Left out on no hit
-      }
-    }
-    else
-    {
-      symbol = C_V ;                                            // STOPLICHT, show "V"
-    }
-  }
-  for ( uint8_t i = 0 ; i < 3  ; i++ )                          // Display on 3 front panels
-  {
-    showchar ( i, symbol, color, n_brightness ) ;               // Show red/green character
-  }
-}
-
-
-//**************************************************************************************************
-//                                     D I S P T A S K                                             *
-//**************************************************************************************************
-// Handle the diplay on the 3 Neopixel panels.                                                     *
-//**************************************************************************************************
-void disptask ( void * parameter )
-{
-  qdisp_struct      dispdata ;                                  // Data from queue
-  int               v = 0 ;                                     // Sequence number
-  RgbColor          color ;                                     // Color to display, assume green
-  uint8_t           resetpwcount = 0 ;                          // Counter for password reset function
-  bool              newbutton = true ;                          // Button drawing or not
-
-  dbgprint ( "Starting neopixel displaytask.." ) ;
-  neodisp.Begin() ;                                             // Initialize NeoPixel
-  neodisp.Show() ;                                              // Output blank pattern
-  // Show IP-address on backside display
-  for ( int i = 0 ; i < 4 ; i++ )
-  {
-    showNeoNum ( ip[i], n_blue ) ;                              // Show next byte of IP-address
-    vTaskDelay ( 2000 / portTICK_PERIOD_MS ) ;                  // For 2 seconds
-    showNeoNum ( 0, n_black ) ;                                 // Blank display
-    vTaskDelay ( 200 / portTICK_PERIOD_MS ) ;                   // Blank for short time
-    if ( ( digitalRead ( BUTTON0 ) == LOW ) ||                  // Check button(s)
-         ( digitalRead ( BUTTON1 ) == LOW ) )
-    {
-       resetpwcount++ ;                                         // Count number of times
-    }
-  }
-  if ( resetpwcount >= 3 )                                      // Seen button long enough?
-  {
-    pwresetreq = true ;                                         // Yes, set pw reset request
-  }
-  dsptaskrdy = true ;                                           // Task is ready for actions
-  neodisp.ClearTo ( 0 ) ;                                       // Blank screen
-  neodisp.Show() ;
-  while ( true )
-  {
-    if ( xQueueReceive ( dispqueue, &dispdata, 100 ) )          // New display request?
-    {
-      neodisp.ClearTo ( 0 ) ;                                   // Clear display
-      showNeoSym ( dispdata.hit ) ;                             // Yes, show hit/no hit
-      color = n_green ;                                         // Color to display, assume green
-      if ( dispdata.hit )                                       // Was it a hit?
-      {
-        color = n_red ;                                         // Yes, color will be red
-      }
-      else
-      {
-        color = n_green ;                                       // No, color will be green
-      }
-      v = dispdata.volgnummer ;                                 // Sequence number
-      showNeoNum ( v, color ) ;                                 // Show sequence at backside panel
-      vTaskDelay ( 5000 / portTICK_PERIOD_MS ) ;                // Active for 5 second
-      newbutton = true ;                                        // Activate button icon on front panel
-    }
-    else                                                        // No new request
-    {                                                           // Inactive
-      if ( newbutton )                                          // Need to show button?
-      {
-        showNeoButton() ;                                       // Show button on front panel
-        newbutton = false ;                                     // Next loop: just animate
-      }
-      else
-      {
-        animateArrow() ;                                        // Scroll the downarrow
-      }
-    }
-  }
+    server.handleClient(); 
+    drawScrollingText();   
 }
