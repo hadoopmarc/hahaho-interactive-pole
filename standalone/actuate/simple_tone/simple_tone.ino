@@ -13,12 +13,14 @@
  10nd February 2025
  */
 
-// Arduino IDE installs esp-arduino v3.x, see:
+// This script with ESP_I2S.h needs arduino-esp32 v3.x with ESP_I2S.h
+// This can be installed with the Arduino IDE, see:
 // AppData/Local/Arduino15/packages/esp32/hardware/esp32/3.3.4/libraries/ESP_I2S/src/ESP_I2S.h
-// PlatformIO still uses esp-arduino v2.x, see:
+// or with the pioarduino clone of PlatformIO, see:
+// https://github.com/pioarduino/platform-espressif32
+// PlatformIO itself still uses arduino-esp v2.x with I2S.h, see:
 // https://github.com/platformio/platform-espressif32/releases
-#include <ESP_I2S.h>  // arduino-core 3.x
-// #include <I2S.h>         // arduino-core 2.x
+#include <ESP_I2S.h>        // arduino-core 3.x
 
 // The GPIO pins are not fixed, most other pins could be used for the I2S function
 // This works on standalone ESP32-dev with only DAC attached and powerd by USB
