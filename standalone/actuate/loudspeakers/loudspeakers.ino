@@ -22,7 +22,7 @@ for that:
 #define FRAMESIZE         1152                           // Max. frame size in bytes(mp3)
 #define OUTSIZE           2048                           // Max number of samples per channel(mp3)
 
-//                                                      // MP3 stuff
+// MP3
 uint8_t*          mp3buff = nullptr;                    // Space allocated for complete MP3 file
 uint8_t*          mp3bpnt;                              // Points into mp3buff
 int               mp3bcnt;                              // Number of samples in buffer
@@ -93,7 +93,7 @@ void play_mp3(char filename[]) {
   size_t         flen;                                             // Length of MP3 file
   size_t         alocspace = 0;                                    // Allocated buffer space
 
-  Serial.println("Starting I2S playtask..");
+  Serial.println("\nStarting I2S playtask..");
   MP3Decoder_AllocateBuffers();                                   // Init HELIX buffers
   digitalWrite(internalLED, HIGH);                            // Show activity
   fp = SPIFFS.open(filename, FILE_READ);                      // Open the MP3 file
@@ -126,15 +126,15 @@ void play_mp3(char filename[]) {
 
 void playBuff(i2s_port_t i2s_num, size_t len)
 {
-  int             newcnt;                            // Number of bytes remaining after decoding
-  static uint32_t samprate;                          // Sample rate
-  static int      channels;                          // Number of channels
-  static int      smpbytes;                          // Number of bytes for I2S
-  int             s;                                 // Position of syncword
-  static bool     once;                              // To execute part of code once
-  int             n;                                 // Number of samples decoded
-  size_t          bw;                                // I2S bytes written
-  int             ops = 0;                           // Number of output samples
+  int      newcnt;                            // Number of bytes remaining after decoding
+  uint32_t samprate;                          // Sample rate
+  int      channels;                          // Number of channels
+  int      smpbytes;                          // Number of bytes for I2S
+  int      s;                                 // Position of syncword
+  bool     once;                              // To execute part of code once
+  int      n;                                 // Number of samples decoded
+  size_t   bw;                                // I2S bytes written
+  int      ops = 0;                           // Number of output samples
 
   s = MP3FindSyncWord(mp3buff, len);                 // Search for first frame, usually at pos=0
   if(s < 0)                                          // Sync found?
@@ -149,46 +149,33 @@ void playBuff(i2s_port_t i2s_num, size_t len)
            "Sync found at 0x%04X, len is %d", s, len);
   Serial.println(buffer);
   while(len > 0) {                                   // More MP3 data in buffer?
-  
     newcnt = len;                                    // Remaining length of buffer
     n = MP3Decode(mp3bpnt, &newcnt,                  // Decode the frame
                     outbuf, 0);
-    if(n == ERR_MP3_NONE)
-    {
-      if(once)
-      {
-        samprate  = MP3GetSampRate();                // Get sample rate
-        channels  = MP3GetChannels();                // Get number of channels
-        int br  = MP3GetBitrate();                 // Get bit rate
-        int bps = MP3GetBitsPerSample();           // Get bits per sample
-        snprintf(buffer, sizeof(buffer),
-           "Hit ERR_MP3_NONE, %d %d %d %d", samprate, channels, br, bps);
+    if(n < 0) {                                      // Check if decode is okay
+      snprintf(buffer, sizeof(buffer), "MP3Decode error %d", n);
+      Serial.println(buffer);
+      return;
+    }
+    if (once) {
+      samprate = MP3GetSampRate();                 // Get sample rate
+      channels = MP3GetChannels();                 // Get number of channels
+      int br = MP3GetBitrate();                    // Get bit rate
+      int bps = MP3GetBitsPerSample();             // Get bits per sample
+      snprintf(buffer, sizeof(buffer),
+          "Sample rate: %d, channels: %d, bitrate: %d, bits per sample: %d",
+          samprate, channels, br, bps);
+      Serial.println(buffer);
+      if(channels == 1) {                          // For mono, half sample rate
+        samprate /= 2;
       }
+      i2s.configureTX(samprate, (i2s_data_bit_width_t)bps, slot);
+      once = false;                                  // No need to set samplerate again
     }
     ops = MP3GetOutputSamps();                       // Get number of output samples
     smpbytes = ops * 2;                              // Number of bytes in outbuf
     mp3bpnt += (len - newcnt);                       // Increment pointer by bytes handled
     len = newcnt;                                    // Length of remaining buffer
-    if(n < 0)                                        // Check if decode is okay
-    {
-      snprintf(buffer, sizeof(buffer), "MP3Decode error %d", n);
-      Serial.println(buffer);
-      return;
-    }
-    if(once)
-    {
-      //Serial.println("Bitrate     is %d", br);        // Show decoder parameters
-      //Serial.println("Samprate    is %d", samprate);
-      //Serial.println("Channels    is %d", channels);
-      //Serial.println("Bitspersamp is %d", bps);
-      //Serial.println("Outputsamps is %d", ops);
-      if(channels == 1)                            // For mono, half sample rate
-      {
-        samprate /= 2;
-      }
-      // i2s_set_sample_rates(i2s_num, samprate);       // Set samplerate
-      once = false;                                  // No need to set samplerate again
-    }
     {
       for(int i = 0; i < ops; i++)                   // Correct amplitude
       {
@@ -197,14 +184,4 @@ void playBuff(i2s_port_t i2s_num, size_t len)
     }
     i2s.write((uint8_t *)outbuf, smpbytes);
   }
-  // memset(outbuf, 0, sizeof(outbuf));                // Fill with silence
-  // while(false)
-  // {
-  //   i2s.write((uint8_t *)outbuf, 128);
-  //   if(bw != 128)
-  //   {
-  //     break;
-  //   }
-  // }
 }
-
