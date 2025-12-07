@@ -2,14 +2,14 @@
 #pragma once
 #pragma GCC optimize ("O3")
 
-#include "Arduino.h"
+#include <Arduino.h>                                   // Needed for PROGMEM macro
 #include "assert.h"
 
 static const uint8_t  m_HUFF_PAIRTABS          =32;
 static const uint8_t  m_BLOCK_SIZE             =18;
 static const uint8_t  m_NBANDS                 =32;
 static const uint8_t  m_MAX_REORDER_SAMPS      =(192-126)*3;      // largest critical band for short blocks (see sfBandTable)
-static const uint16_t m_VBUF_LENGTH            =17*2* m_NBANDS;    // for double-sized vbuf FIFO
+static const uint16_t m_VBUF_LENGTH            =17*2* m_NBANDS;   // for double-sized vbuf FIFO
 static const uint8_t  m_MAX_SCFBD              =4;     // max scalefactor bands per channel
 static const uint16_t m_MAINBUF_SIZE           =1940;
 static const uint8_t  m_MAX_NGRAN              =2;     // max granules
@@ -118,7 +118,7 @@ typedef struct DequantInfo {
 } DequantInfo_t;
 
 typedef struct HuffmanInfo {
-    int huffDecBuf[m_MAX_NCHAN][m_MAX_NSAMP];       /* used both for decoded Huffman values and dequantized coefficients */
+    int huffDecBuf[m_MAX_NCHAN][m_MAX_NSAMP];     /* used both for decoded Huffman values and dequantized coefficients */
     int nonZeroBound[m_MAX_NCHAN];                /* number of coeffs in huffDecBuf[ch] which can be > 0 */
     int gb[m_MAX_NCHAN];                          /* minimum number of guard bits in huffDecBuf[ch] */
 } HuffmanInfo_t;
