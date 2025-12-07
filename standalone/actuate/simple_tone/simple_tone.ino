@@ -20,6 +20,12 @@
 // https://github.com/pioarduino/platform-espressif32
 // PlatformIO itself still uses arduino-esp v2.x with I2S.h, see:
 // https://github.com/platformio/platform-espressif32/releases
+
+// The PCM5102 breakout board may need solder bridges,
+// e.g. see https://github.com/pschatzmann/arduino-audio-tools/issues/773
+// The one tested showed stereo output on the LOUT and ROUT pins, but only
+// had output on one of the channels of the jack connector only.
+
 #include <ESP_I2S.h>        // arduino-core 3.x
 
 // The GPIO pins are not fixed, most other pins could be used for the I2S function
@@ -33,8 +39,8 @@
 // #define I2S_BCLK 2
 // #define I2S_DIN  35
 
-const int frequency = 440;    // frequency of square wave in Hz
-const int amplitude = 1000;   // amplitude of square wave
+const int frequency = 55;     // frequency of square wave in Hz
+const int amplitude = 20000;  // amplitude of square wave
 const int sampleRate = 8000;  // sample rate in Hz
 
 i2s_data_bit_width_t bps = I2S_DATA_BIT_WIDTH_16BIT;
@@ -59,6 +65,10 @@ void setup() {
     Serial.println("Failed to initialize I2S!");
     while (1);  // do nothing
   }
+  Serial.print("sample: ");
+  Serial.println(sample);
+  Serial.print("sample>>8: ");
+  Serial.println(sample>>8);
 }
 
 void loop() {
@@ -72,8 +82,9 @@ void loop() {
   i2s.write(sample >> 8);
 
   // Right channel, the low 8 bits then high 8 bits
-  i2s.write(sample);
-  i2s.write(sample >> 8);
+  // Get them 180 degrees out of phase to demonstrate stereo on an oscilloscope
+  i2s.write(-sample);
+  i2s.write((-sample) >> 8);
 
   // increment the counter for the next sample
   count++;
