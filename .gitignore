@@ -1,6 +1,7 @@
 dev/**
 .pio
 .vscode/
+*.code-workspace
 **/*.DS_Store
 **/secrets.cpp
 
