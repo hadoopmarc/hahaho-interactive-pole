@@ -2,32 +2,40 @@
 #include <Arduino.h>
 #include <esp32_wiring.h>
 
-// Explicit pimodes for all available GPIO pins
+// Explicit pinmodes for all available GPIO pins
 void esp32_wiring_setup() {
-  // Special GPIO pins
+
+  // System GPIO pins
   pinMode(internalLED, OUTPUT);
   pinMode(serial0RX, INPUT);
   pinMode(serial0TX, OUTPUT);
-  pinMode(free0, INPUT);
-  pinMode(free1, INPUT);
-  pinMode(free2, INPUT);
-  // Sensor GPIO pins
-  pinMode(redButton, INPUT_PULLUP);
-  pinMode(frontPIR, INPUT);
-  pinMode(backPIR, INPUT);
-  pinMode(gpsSerial, INPUT);
-  // Output GPIO pins
-  pinMode(buzzer, OUTPUT);
-  pinMode(audioEnable, OUTPUT);
-  pinMode(audioLeft, OUTPUT);
-  pinMode(audioRight, OUTPUT);
-  pinMode(neoPixel, OUTPUT);
-  // Interface GPIO pins
+
+  // Special purpose GPIO ports
   pinMode(serial2RX, INPUT);
   pinMode(serial2TX, OUTPUT);
-  pinMode(sckSPI, OUTPUT);
-  pinMode(misoSPI, INPUT);
-  pinMode(mosiSPI, OUTPUT);
+  pinMode(DAC1, OUTPUT);
+  pinMode(DAC2, OUTPUT);
+
+  // General use GPIO ports
+  pinMode(redButton, INPUT);
+  // pinMode(free1,);
+  // pinMode(free2,);
+
+  // Sensor GPIO pins (input only)
+  pinMode(frontPIR, INPUT);
+  pinMode(backPIR, INPUT);
+  pinMode(ADC1_0, INPUT);
+  pinMode(ADC1_3, INPUT);
+
+  // Output GPIO pins
+  pinMode(buzzer, OUTPUT);
+  pinMode(neoPixel, OUTPUT);
+
+  // Shared bus default GPIO pins (can be remapped for other uses when necessary)
+  pinMode(sckHSPI, OUTPUT);
+  pinMode(misoHSPI, INPUT);
+  pinMode(mosiHSPI, OUTPUT);
+  pinMode(csHSPI, OUTPUT);
   pinMode(sclI2C, OUTPUT);
   pinMode(sdaI2C, INPUT);
   pinMode(bclkI2S, OUTPUT);
