@@ -8,15 +8,15 @@ for that:
 */
 #include <ESP_I2S.h>                                  // arduino-core 3.x
 #include <SPIFFS.h>
-// #include "esp32_wiring.h"
+#include "esp32_wiring.h"
 #include "mp3_decoder.h"
 #include "mp3_player.h"
 
 // Should come from esp32_wiring.h
-#define internalLED  2
-#define I2S_LRC  33
-#define I2S_BCLK 14
-#define I2S_DIN  27
+// #define internalLED  2
+// #define I2S_LRC  33
+// #define I2S_BCLK 14
+// #define I2S_DIN  27
 
 // MP3
 #define FRAMESIZE         1152                        // Max. frame size in bytes(mp3)
@@ -40,7 +40,7 @@ I2SClass i2s;
 
 
 void setup_mp3() {
-  i2s.setPins(I2S_BCLK, I2S_LRC, I2S_DIN);
+  i2s.setPins(bclkI2S, lrcI2S, dinI2S);
 
   // start I2S at the sample rate with 16-bits per sample
   if (!i2s.begin(mode, sampleRate, bps, slot)) {

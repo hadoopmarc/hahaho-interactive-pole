@@ -20,41 +20,41 @@ with the WiFi hardware.
 #define ESP32_WIRING_H
 
 // System GPIO pins
-#define internalLED  GPIO_02   // pin19   Reserved built-in LED
-#define serial0RX    GPIO_03   // pin27   Reserved input RXD0 for USB serial
-#define serial0TX    GPIO_01   // pin28   Reserved output TXD0 for USB serial
+#define internalLED  02   // pin19   Reserved built-in LED
+#define serial0RX    03   // pin27   Reserved input RXD0 for USB serial
+#define serial0TX    01   // pin28   Reserved output TXD0 for USB serial
 
 // Special purpose GPIO ports
-#define serial2RX    GPIO_16   // pin21   Free for serial input RXD2
-#define serial2TX    GPIO_17   // pin22   Free for serial output TXD2
-#define DAC1         GPIO_25   // pin08   Free as DAC1
-#define DAC2         GPIO_26   // pin09   Free as DAC2
+#define serial2RX    16   // pin21   Free for serial input RXD2
+#define serial2TX    17   // pin22   Free for serial output TXD2
+#define DAC1         25   // pin08   Free as DAC1
+#define DAC2         26   // pin09   Free as DAC2
 
 // General use GPIO ports
-#define redButton    GPIO_05   // pin23   In use for big button (wire it directly to GND; CS inactive high by default)
-#define free1        GPIO_19   // pin25   Free
-#define free2        GPIO_23   // pin30   Free
+#define redButton    05   // pin23   In use for big button (wire it directly to GND; CS inactive high by default)
+#define free1        19   // pin25   Free
+#define free2        23   // pin30   Free
 
 // Sensor GPIO pins (input only)
-#define frontPIR     GPIO_34   // pin04   In use for PIR sensor
-#define backPIR      GPIO_35   // pin05   In use for PIR sensor
-#define ADC1_0       GPIO_36   // pin02   Free as ADC1_0
-#define ADC1_3       GPIO_39   // pin03   Free as ADC1_3
+#define frontPIR     34   // pin04   In use for PIR sensor
+#define backPIR      35   // pin05   In use for PIR sensor
+#define ADC1_0       36   // pin02   Free as ADC1_0
+#define ADC1_3       39   // pin03   Free as ADC1_3
 
 // Output GPIO pins
-#define buzzer       GPIO_04   // pin20   In use for buzzer (wire it to GND via 100 Ohm)
-#define neoPixel     GPIO_18   // pin24   In use for data line of neopixel panel
+#define buzzer       04   // pin20   In use for buzzer (wire it to GND via 100 Ohm)
+#define neoPixel     18   // pin24   In use for data line of neopixel panel
 
 // Shared bus default GPIO pins (can be remapped for other uses when necessary)
-#define sckHSPI      GPIO_14   // pin11   Free for SPI peripherals
-#define misoHSPI     GPIO_12   // pin12   Free for SPI peripherals
-#define mosiHSPI     GPIO_13   // pin13   Free for SPI peripherals
-#define csHSPI       GPIO_15   // pin18   Free for SPI peripherals
-#define sclI2C       GPIO_22   // pin29   Free for I2C peripherals
-#define sdaI2C       GPIO_21   // pin26   Free for I2c peripherals
-#define bclkI2S      GPIO_32   // pin06   In use for Inter-IC-Sound bitclock to PCM5102
-#define lrcI2S       GPIO_33   // pin07   In use for Inter-IC-Sound left/right clock to PCM5102
-#define dinI2S       GPIO_27   // pin10   In use for Inter-IC-Sound data to PCM5102
+#define sckHSPI      14   // pin11   Free for SPI peripherals
+#define misoHSPI     12   // pin12   Free for SPI peripherals
+#define mosiHSPI     13   // pin13   Free for SPI peripherals
+#define csHSPI       15   // pin18   Free for SPI peripherals
+#define sclI2C       22   // pin29   Free for I2C peripherals
+#define sdaI2C       21   // pin26   Free for I2c peripherals
+#define bclkI2S      32   // pin06   In use for Inter-IC-Sound bitclock to PCM5102
+#define lrcI2S       33   // pin07   In use for Inter-IC-Sound left/right clock to PCM5102
+#define dinI2S       27   // pin10   In use for Inter-IC-Sound data to PCM5102
 
 void esp32_wiring_setup();     // Including esp32_wiring.h implies doing the setuo
 

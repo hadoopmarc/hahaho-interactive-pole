@@ -8,11 +8,11 @@ for that:
 */
 #include <string.h>
 #include <SPIFFS.h>
-// #include "esp32_wiring.h"
+#include "esp32_wiring.h"
 #include "mp3_player.h"
 
 // Should come from esp32_wiring.h
-#define internalLED  2
+// #define internalLED  2
 
 char buffer[100];  // Used for formatted print
 
