@@ -1,5 +1,5 @@
 /*
-This script uses the SPIFFS file system(https://github.com/espressif/arduino-esp32/tree/master/libraries/SPIFFS)
+This script uses the SPIFFS file system (https://github.com/espressif/arduino-esp32/tree/master/libraries/SPIFFS)
 and assumes that the data folder in the script folder is built as image and uploaded
 to the ESP32. In the PlatformIO IDE the following esp32dev Platform project tasks are available
 for that:
@@ -7,7 +7,7 @@ for that:
 2. Upload Filesystem Image
 
 Arduino IDE 2.x does not support SPIFFS, only LittleFS, see:
-https://randomnerdtutorials.com/arduino-ide-2-install-esp32-littlefs/
+      https://randomnerdtutorials.com/arduino-ide-2-install-esp32-littlefs/
 ToDo: migrate to LittleFS so that it works with both IDE's, see:
       https://randomnerdtutorials.com/esp32-vs-code-platformio-littlefs/
 */
