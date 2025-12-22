@@ -1,13 +1,15 @@
+// When using the Arduino IDE, see the lib_deps in platformio.ini for the
+// the libraries to be installed with the library manager.
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WiFiManager.h>
 #include <FastLED.h>
 #include <FastLED_NeoMatrix.h>
+#include <esp32_wiring.h>  // Implies setting neoPixel GPIO port
 
 // -- OBJECTEN & CONFIGURATIE --
 WebServer server(80); 
 
-#define LED_PIN 18 // Pin die werkt voor de ESP32 RMT driver
 const uint16_t matrix_width = 64; 
 const uint16_t matrix_height = 8;
 const uint16_t NUM_LEDS = matrix_width * matrix_height; 
@@ -116,7 +118,7 @@ void setup() {
     Serial.begin(115200);
 
     // FastLED setup
-    FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
+    FastLED.addLeds<NEOPIXEL, neoPixel>(leds, NUM_LEDS);
     FastLED.setBrightness(currentBrightness);
     FastLED.clear();
 
