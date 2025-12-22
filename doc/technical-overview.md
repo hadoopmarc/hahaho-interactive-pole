@@ -2,7 +2,7 @@
 
 Electronic parts
 - ESP-WROOM-32
-- [PCM5102A DAC module for Raspberry Pi](https://www.otronic.nl/nl/wcmcu-5102-module-stereo-dac-digitaal-naar-analoog.html)
+- [PCM5102A DAC module for Raspberry Pi](https://manuals.plus/asin/B07Q9K5MT8, also see for soldering bridges: https://github.com/pschatzmann/arduino-audio-tools/wiki/External-DAC)
 - [PAM8610 2x15 W audio amplifier](https://nl.aliexpress.com/item/1005006493004179.html)
 - 2 x loudspeaker 5W
 - microswitch
