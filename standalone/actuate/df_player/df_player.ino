@@ -36,13 +36,15 @@ void printDetail(uint8_t type, int value);
 
 void setup()
 {
+  esp32_wiring_setup();
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, serial2RX, serial2TX);
   Serial.println();
   Serial.println(F("DFRobot DFPlayer Mini Demo"));
   Serial.println(F("Initializing DFPlayer ... (May take 3~5 seconds)"));
   
-  if (!myDFPlayer.begin(Serial2, /*isACK = */true, /*doReset = */true)) {  //Use serial to communicate with mp3.
+  //Use Serial2 to communicate with mp3 DFPlayer
+  if (!myDFPlayer.begin(Serial2, /*isACK = */true, /*doReset = */true)) {
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
     Serial.println(F("2.Please insert the SD card!"));
@@ -126,6 +128,7 @@ void setup()
   Serial.println(myDFPlayer.readFileCounts()); //read all file counts in SD card
   Serial.println(myDFPlayer.readCurrentFileNumber()); //read current play file number
   Serial.println(myDFPlayer.readFileCountsInFolder(1)); //read file counts in folder SD:/01}
+}
 
 void loop()
 {
