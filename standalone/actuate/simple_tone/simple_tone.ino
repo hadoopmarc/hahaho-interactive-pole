@@ -26,18 +26,8 @@
 // The one tested showed stereo output on the LOUT and ROUT pins, but only
 // had output on one of the channels of the jack connector only.
 
-#include <ESP_I2S.h>        // arduino-core 3.x
-
-// The GPIO pins are not fixed, most other pins could be used for the I2S function
-// This works on standalone ESP32-dev with only DAC attached and powerd by USB
-#define I2S_LRC  33
-#define I2S_BCLK 14
-#define I2S_DIN  27
-
-// On fietspaal hardwired. Checked does not work, because GPIO input only
-// #define I2S_LRC  33
-// #define I2S_BCLK 2
-// #define I2S_DIN  35
+#include <ESP_I2S.h>          // arduino-core 3.x
+#include <esp32_wiring.h>
 
 const int frequency = 55;     // frequency of square wave in Hz
 const int amplitude = 20000;  // amplitude of square wave
@@ -49,7 +39,7 @@ i2s_slot_mode_t slot = I2S_SLOT_MODE_STEREO;
 
 const unsigned int halfWavelength = sampleRate / frequency / 2;  // half wavelength of square wave
 
-int32_t sample = amplitude;  // current sample value
+int32_t sample = amplitude;   // current sample value
 unsigned int count = 0;
 
 I2SClass i2s;
@@ -58,7 +48,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println("I2S simple tone");
 
-  i2s.setPins(I2S_BCLK, I2S_LRC, I2S_DIN);
+  esp32_wiring_setup();
+  i2s.setPins(bclkI2S, lrcI2S, dinI2S);
 
   // start I2S at the sample rate with 16-bits per sample
   if (!i2s.begin(mode, sampleRate, bps, slot)) {
