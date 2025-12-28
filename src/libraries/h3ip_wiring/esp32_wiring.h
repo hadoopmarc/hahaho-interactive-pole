@@ -25,15 +25,15 @@ with the WiFi hardware.
 #define serial0TX    01   // pin28   Reserved output TXD0 for USB serial
 
 // Special purpose GPIO ports
-#define serial2RX    16   // pin21   Free for serial input RXD2
-#define serial2TX    17   // pin22   Free for serial output TXD2
+#define serial2RX    16   // pin21   In use as serial for mp3 DfPlayer
+#define serial2TX    17   // pin22   In use as serial for mp3 DfPlayer
 #define DAC1         25   // pin08   Free as DAC1
 #define DAC2         26   // pin09   Free as DAC2
 
 // General use GPIO ports
 #define redButton    05   // pin23   In use for big button (wire it directly to GND; CS inactive high by default)
-#define free1        19   // pin25   Free
-#define free2        23   // pin30   Free
+#define stroboscope  19   // pin25   In use for stroboscope light
+#define free         23   // pin30   Free for general use
 
 // Sensor GPIO pins (input only)
 #define frontPIR     34   // pin04   In use for PIR sensor
