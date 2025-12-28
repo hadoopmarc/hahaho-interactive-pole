@@ -6,19 +6,16 @@
   * The stroboscope light can handle 12V towards the collector of the BD137 (10V is fine too).
   * Do not forget to also connect the GND of the Arduino/ESP to the GND of the external 12V power supply.
   */
-
-int ledPin = 13;
-int drivePin = 2;
+# include "esp32_wiring.h"
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Stroboscope light demo");
-  pinMode(ledPin, OUTPUT);
-  pinMode(drivePin, OUTPUT);
+  esp32_wiring_setup();  // Implies setting internalLED and stroboscope GPIO pins as output
 }
 
 void loop() {
-  digitalWrite(ledPin, !digitalRead(ledPin));
-  digitalWrite(drivePin, !digitalRead(drivePin));
+  digitalWrite(internalLED, !digitalRead(internalLED));
+  digitalWrite(stroboscope, !digitalRead(stroboscope));
   delay(5000);
 }
