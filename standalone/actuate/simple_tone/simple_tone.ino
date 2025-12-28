@@ -30,7 +30,7 @@
 #include <esp32_wiring.h>
 
 const int frequency = 55;     // frequency of square wave in Hz
-const int amplitude = 20000;  // amplitude of square wave
+const int amplitude = 5000;   // amplitude of square wave
 const int sampleRate = 8000;  // sample rate in Hz
 
 i2s_data_bit_width_t bps = I2S_DATA_BIT_WIDTH_16BIT;
