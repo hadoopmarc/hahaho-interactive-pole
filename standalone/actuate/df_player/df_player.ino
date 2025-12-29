@@ -43,7 +43,7 @@ void setup()
   Serial.println(F("DFRobot DFPlayer Mini Demo"));
   Serial.println(F("Initializing DFPlayer ... (May take 3~5 seconds)"));
   
-  //Use Serial2 to communicate with mp3 DFPlayer
+  // Use Serial2 to communicate with mp3 DFPlayer
   if (!myDFPlayer.begin(Serial2, /*isACK = */true, /*doReset = */true)) {
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
@@ -56,7 +56,7 @@ void setup()
   myDFPlayer.setTimeOut(2000); //Set serial communictaion time out 500ms
   Serial.println(F("Timeout set"));
   //----Set volume----
-  myDFPlayer.volume(10);  //Set volume value (0~30).
+  myDFPlayer.volume(20);  //Set volume value (0~30).
   Serial.println(F("Volume set"));
   myDFPlayer.volumeUp(); //Volume Up
   myDFPlayer.volumeDown(); //Volume Down
