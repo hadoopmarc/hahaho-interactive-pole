@@ -20,7 +20,7 @@ char buffer[100];  // Used for formatted print
 
 
 void setup() {
-  pinMode(internalLED, OUTPUT);
+  esp32_wiring_setup();
   Serial.begin(115200);
   if(!SPIFFS.begin(true)) {
     Serial.println("An Error occurred while mounting SPIFFS");
