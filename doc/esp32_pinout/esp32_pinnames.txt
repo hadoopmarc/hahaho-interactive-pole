@@ -1,0 +1,35 @@
+The pinnames below are defined in src/libraries/h3ip_wiring/esp32_wiring.h
+
+They are repeated below to allow for copy/paste to the pinout diagram.
+
+Left column
+
+reserved
+ADC1_0
+ADC1_3
+frontPIR
+backPIR
+bclkI2S
+lrcI2S
+DAC1
+DAC2
+dinI2S
+sckHSPI
+misoHSPI
+mosiHSPI
+
+Right column
+
+free
+sclI2C
+reserved
+reserved
+sdaI2C
+stroboscope
+neoPixel
+redButton
+mp3DFTX
+mp3DFRX
+buzzer
+internalLED
+csHSPI
