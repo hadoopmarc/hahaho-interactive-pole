@@ -7,8 +7,8 @@ void esp32_wiring_setup() {
 
   // System GPIO pins
   pinMode(internalLED, OUTPUT);
-  pinMode(serial0RX, INPUT);
-  pinMode(serial0TX, OUTPUT);
+  // pinMode(serial0RX, ...);  This is handled by Serial.begin(115200)
+  // pinMode(serial0TX, ...);  This is handled by Serial.begin(115200)
 
   // Special purpose GPIO ports
   pinMode(serial2RX, INPUT);
@@ -17,7 +17,7 @@ void esp32_wiring_setup() {
   pinMode(DAC2, OUTPUT);
 
   // General use GPIO ports
-  pinMode(redButton, INPUT);
+  pinMode(redButton, INPUT_PULLUP);
   pinMode(stroboscope, OUTPUT);
   // pinMode(free,);
 
