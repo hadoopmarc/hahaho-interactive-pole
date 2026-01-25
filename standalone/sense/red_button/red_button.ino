@@ -29,7 +29,7 @@ volatile bool hitButton = false;            // Flag to be set by the interrupt a
 volatile unsigned long hitMicros;           // Set by the interrupt only
 
 enum HitState { 
-    START, HIT_ONCE, HIT_TWICE, PAUSE
+    START, HIT_ONCE, HIT_TWICE, HIT_THRICE, PAUSE
 } hitState = START;
 
 
@@ -72,14 +72,19 @@ void loop() {
     }
   } else if (hitState == HIT_TWICE) {
     if (hitButton && diffMicros >= hitDelayBefore) {
-      hitThriceOn = !hitThriceOn;
       hitButton = false;
-      hitState = PAUSE;
+      hitState = HIT_THRICE;
       Serial.println("--> HIT_THRICE");
-      printToggleSwitches();
     } else if (diffMicros >= hitDelayDuring) {
       hitButton = false;
       hitTwiceOn = !hitTwiceOn;
+      hitState = PAUSE;
+      printToggleSwitches();
+    }
+  } else if (hitState == HIT_THRICE) {
+    if (diffMicros >= hitDelayDuring) {
+      hitButton = false;
+      hitThriceOn = !hitThriceOn;
       hitState = PAUSE;
       printToggleSwitches();
     }
@@ -96,7 +101,7 @@ void loop() {
 
 
 void printToggleSwitches() {
-  Serial.print("\nhitOnce:    ");
+  Serial.print("hitOnce:    ");
   Serial.println((hitOnceOn) ? "on" : "off");
   Serial.print("hitTwice:   ");
   Serial.println((hitTwiceOn) ? "on" : "off");
