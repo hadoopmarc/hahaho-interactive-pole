@@ -33,7 +33,7 @@ with the WiFi hardware.
 // General use GPIO ports
 #define redButton    05   // pin23   In use for big button (wire it directly to GND; CS inactive high by default)
 #define stroboscope  19   // pin25   In use for stroboscope light
-#define free         23   // pin30   Free for general use
+#define freePin      23   // pin30   Free for general use
 
 // Sensor GPIO pins (input only)
 #define frontPIR     34   // pin04   In use for PIR sensor

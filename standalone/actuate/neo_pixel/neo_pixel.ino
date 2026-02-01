@@ -1,43 +1,30 @@
-// When using the Arduino IDE, see the lib_deps in platformio.ini for the
-// the libraries to be installed with the library manager.
+/*
+This script wraps the neopixel_vertical library for the HaHaHo Interactive Pole
+in a standalalone webapp to experiment with the NeoPixel matrix display.
+
+When using the Arduino IDE, see the lib_deps in platformio.ini for the
+the libraries to be installed with the library manager.
+*/
+
 #include <WiFi.h>
 #include <WiFiManager.h>
 #define WEBSERVER_H  // Prevent redefinitions done by WiFiManager, see:
                      // https://stackoverflow.com/questions/75043892/i-am-facing-http-get-conflicts-with-a-previous-declaration-error-with-the-wifi
 #include <ESPAsyncWebServer.h>
-#include <FastLED.h>
-#include <FastLED_NeoMatrix.h>
-#include <esp32_wiring.h>  // Implies setting neoPixel GPIO port
+// #include "esp32_wiring.h"  // Implies setting neoPixel GPIO port
+#include "neopixel_vertical.h"
 
 // -- OBJECTEN & CONFIGURATIE --
 AsyncWebServer server(80);
-// WebServer server(80); 
 
 const uint16_t matrix_width = 64; 
 const uint16_t matrix_height = 8;
 const uint16_t NUM_LEDS = matrix_width * matrix_height; 
 
-// Constante font hoogte gedefinieerd om de compiler fout op te lossen (standaard 8 pixels)
-const int FONT_HEIGHT = 8; 
-// Verticale afstand tussen de karakters (5 pixels letter + 3 pixels spatie = 8)
-const int VERTICAL_SPACING = 8; 
-// X-positie voor centrering: (8 - 5) / 2 = 1.
-const int CENTER_X = 1; 
-
-// -- GLOBALE VARIABELEN --
 String displayText = "WiFi Connected!";
-int scrollSpeed = 60;
-int y_pos; // Gebruik y_pos voor verticale scrolling
-unsigned long previousScrollTime = 0;
 
 uint8_t currentBrightness = 100; // Helderheid iets verhoogd voor zichtbaarheid
 CRGB currentColor = CRGB::OrangeRed;
-
-CRGB leds[NUM_LEDS]; 
-
-// Werkende mapper-configuratie voor geroteerd scherm (BOTTOM/RIGHT/COLUMNS/ZIGZAG)
-FastLED_NeoMatrix matrix(leds, matrix_width, matrix_height, 1, 1, 
-                         NEO_MATRIX_BOTTOM + NEO_MATRIX_RIGHT + NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG);
 
 // Functies om de web requests af te handelen
 void handleRoot(AsyncWebServerRequest *request) {
@@ -48,69 +35,25 @@ void handleSet(AsyncWebServerRequest *request) {
     if (request->hasArg("text")) {
         displayText = request->arg("text");
         if (displayText == "") displayText = " ";
-        // Reset y_pos naar de hoogte (8 pixels)
-        y_pos = matrix.height(); 
+        setNeoPixelText(displayText);
     }
     if (request->hasArg("brightness")) {
         currentBrightness = request->arg("brightness").toInt();
-        FastLED.setBrightness(currentBrightness);
+        setNeoPixelBrightness(currentBrightness);
     }
     if (request->hasArg("color")) {
         String colorStr = request->arg("color");
         long number = (long)strtol(&colorStr[1], NULL, 16);
-        currentColor = CRGB(number);
-        matrix.setTextColor(convertCRGBtoRGB565(currentColor));
+        setNeoPixelColor(number);
     }
     request->redirect("/", 303);
-}
-
-// Non-blocking scrolling text function
-void drawScrollingText() {
-    unsigned long currentTime = millis();
-    if (currentTime - previousScrollTime >= scrollSpeed) {
-        previousScrollTime = currentTime;
-        
-        matrix.fillScreen(0);
-        
-        // Gebruik de constante X-positie voor centrering
-        int char_x = CENTER_X; 
-        int char_y = y_pos; 
-        
-        // Loop door elk karakter in de string
-        for (int i = 0; i < displayText.length(); i++) {
-            matrix.setCursor(char_x, char_y);
-            matrix.print(displayText[i]);
-            
-            // Verschuif de Y-positie met de gedefinieerde VERTICAL_SPACING
-            char_y += VERTICAL_SPACING; 
-        }
-
-        // Decrement y_pos. Reset als de hele kolom karakters van het scherm is
-        if (--y_pos < -(int)(VERTICAL_SPACING * displayText.length())) {
-            y_pos = matrix.height(); 
-        }
-        
-        // Deze show-functies moeten de LED's data sturen
-        matrix.show();
-        FastLED.show();
-    }
 }
 
 void setup() {
     Serial.begin(115200);
 
     // FastLED setup
-    FastLED.addLeds<NEOPIXEL, neoPixel>(leds, NUM_LEDS);
-    FastLED.setBrightness(currentBrightness);
-    FastLED.clear();
-
-    // Matrix setup
-    matrix.begin();
-    matrix.setRotation(1); // 90 graden rotatie
-    matrix.setTextWrap(false);
-    matrix.setTextColor(convertCRGBtoRGB565(currentColor));
-    matrix.setFont();
-    y_pos = matrix.height(); 
+    setupNeoPixel();
 
     // Start WiFiManager
     WiFiManager wm;
@@ -135,11 +78,6 @@ void setup() {
 
 void loop() {
     drawScrollingText(); 
-}
-
-// Functie om 24-bit CRGB kleur om te zetten naar 16-bit RGB565
-uint16_t convertCRGBtoRGB565(const CRGB &c) {
-    return ((c.r & 0xF8) << 8) | ((c.g & 0xFC) << 3) | (c.b >> 3);
 }
 
 // Genereert de HTML voor de webpagina

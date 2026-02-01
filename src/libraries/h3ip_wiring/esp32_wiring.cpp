@@ -19,7 +19,7 @@ void esp32_wiring_setup() {
   // General use GPIO ports
   pinMode(redButton, INPUT);
   pinMode(stroboscope, OUTPUT);
-  // pinMode(free,);
+  pinMode(freePin, INPUT);
 
   // Sensor GPIO pins (input only)
   pinMode(frontPIR, INPUT);
