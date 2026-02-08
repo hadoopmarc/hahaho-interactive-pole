@@ -2,6 +2,10 @@
 This script wraps the neopixel_vertical library for the HaHaHo Interactive Pole
 in a standalalone webapp to experiment with the NeoPixel matrix display.
 
+The script keeps restarting until an SSID + password to a WiFi access point is
+entered at the web page at http://192.168.4.1 (reachable via the esp32 acting
+as access point itself).
+
 When using the Arduino IDE, see the lib_deps in platformio.ini for the
 the libraries to be installed with the library manager.
 */
@@ -11,7 +15,6 @@ the libraries to be installed with the library manager.
 #define WEBSERVER_H  // Prevent redefinitions done by WiFiManager, see:
                      // https://stackoverflow.com/questions/75043892/i-am-facing-http-get-conflicts-with-a-previous-declaration-error-with-the-wifi
 #include <ESPAsyncWebServer.h>
-// #include "esp32_wiring.h"  // Implies setting neoPixel GPIO port
 #include "neopixel_vertical.h"
 
 // -- OBJECTEN & CONFIGURATIE --
