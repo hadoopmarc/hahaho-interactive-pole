@@ -12,8 +12,6 @@ HIT_TWICE: an interaction is detected while in the HIT_ONCE state. After
   progresses to PAUSE immediately.
 PAUSE: the interaction is finished. If hitDelayAfter has passed, the state
   returns to START.
-
-F
 */
 
 #include "esp32_wiring.h"
