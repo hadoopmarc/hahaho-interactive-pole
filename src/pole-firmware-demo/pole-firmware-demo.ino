@@ -61,7 +61,7 @@ String displayText = "Pole firmware started!";
 
 // Web server
 char dashURI[] = "/dash";
-char serialURI[] = "/serial";
+char serialURI[] = "/webserial";
 char updateURI[] = "/update";
 AsyncWebServer server(80);
 AsyncWebSerial webSerial;
@@ -183,6 +183,7 @@ void loop() {
       hitState = PAUSE;
       printToggleSwitches();
       displayText = "HIT ONCE!";
+      webSerial.println(displayText);
     }
   } else if (hitState == HIT_TWICE) {
     if (hitButton && diffMicros >= hitDelayBefore) {
@@ -195,6 +196,7 @@ void loop() {
       hitState = PAUSE;
       printToggleSwitches();
       displayText = "HIT TWICE!";
+      webSerial.println(displayText);
     }
   } else if (hitState == HIT_THRICE) {
     if (diffMicros >= hitDelayDuring) {
@@ -203,6 +205,7 @@ void loop() {
       hitState = PAUSE;
       printToggleSwitches();
       displayText = "HIT THRICE!";
+      webSerial.println(displayText);
     }
   } else {  // hitState == PAUSE
     if (hitButton) {
