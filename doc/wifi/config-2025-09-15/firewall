@@ -1,0 +1,42 @@
+
+config defaults
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+
+config zone
+	option name 'lan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	list network 'lan'
+	option masq '1'
+
+config zone
+	option name 'lan_wlan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	list network 'wlan_hahaho'
+	option masq '1'
+
+config forwarding
+	option src 'lan_wlan'
+	option dest 'lan'
+
+config zone
+	option name 'wwan_pubr'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	list network 'wwan_pubroam'
+	option masq '1'
+
+config forwarding
+	option src 'lan_wlan'
+	option dest 'wwan_pubr'
+
+config forwarding
+	option src 'wwan_pubr'
+	option dest 'lan_wlan'
+
