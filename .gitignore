@@ -4,6 +4,7 @@ dev/**
 *.code-workspace
 **/*.DS_Store
 **/secrets.cpp
+**/.history
 
 # Prerequisites
 *.d
