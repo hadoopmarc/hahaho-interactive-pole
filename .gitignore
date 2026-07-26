@@ -5,6 +5,7 @@ dev/**
 **/*.DS_Store
 **/secrets.cpp
 **/.history
+**/*-backups
 
 # Prerequisites
 *.d
