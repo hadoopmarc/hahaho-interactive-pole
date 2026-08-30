@@ -8,8 +8,6 @@ void setupNeoPixel();
 void setNeoPixelText(String text);
 void setNeoPixelBrightness(int brightness);
 void setNeoPixelColor(long number);
-
-// Non-blocking scrolling text function
-void drawScrollingText();
+void drawScrollingText();  // Non-blocking scrolling text function
 
 #endif // NEOPIXEL_VERTICAL_H
