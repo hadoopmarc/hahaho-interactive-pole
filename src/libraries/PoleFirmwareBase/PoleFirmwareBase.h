@@ -8,12 +8,16 @@
 
 using namespace dash;
 
+
 class PoleFirmwareBase {
     private:
         // Web server
-        char serialURI[11] = "/webserial";
-        char updateURI[8] = "/update";
-        char dashURI[6] = "/dash";
+        const char serialURI[11] = "/webserial";
+        const char updateURI[8] = "/update";
+        const char dashURI[6] = "/dash";
+        const char *displayText;
+        static void handlePush();
+        void printToggleSwitches();
 
     public:
         AsyncWebServer* server = new AsyncWebServer(80);
@@ -28,6 +32,13 @@ class PoleFirmwareBase {
         void setup();
         void sense_loop();
         void act_loop();
+        bool getHitOnce();                          // Toggle state for a single hit
+        bool getHitTwice();                         // Toggle state for a dual hit
+        bool getHitThrice();                        // Toggle state for a triple hit
+        void resetHitOnce();                        // Set HitOnce toggle switch to false
+        void resetHitTwice();                       // Set HitTwice toggle switch to false
+        void resetHitThrice();                      // Set HitTrice toggle switch to false
+        void setDisplayText(const char *newText);
 };
 
 #endif // POLE_FIRMWARE_BASE_H

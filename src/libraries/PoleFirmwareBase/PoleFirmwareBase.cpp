@@ -46,39 +46,35 @@ const uint16_t matrix_height = 8;
 const uint16_t NUM_LEDS = matrix_width * matrix_height; 
 uint8_t currentBrightness = 100; // Helderheid iets verhoogd voor zichtbaarheid
 CRGB currentColor = CRGB::OrangeRed;
-String displayText = "Pole firmware started!";
 
-// Variables for example funtionality
-int ledState = LOW;                        // State of the LED to be negated in each loop 
-int webSerialCounter = 0;                  // Example output for webSerial
+// Variables for example funtionality  ToDo: move to .ino file
+int ledState = LOW;                         // State of the LED to be negated in each loop 
+int webSerialCounter = 0;                   // Example output for webSerial
 
 // Timing control
-const long ledPeriod = 200;                // Interval at which to blink (milliseconds)
-unsigned long ledMillis = 0;               // Millis at the last led state change
-const long serialPeriod = 1000;            // Interval at which to update the webSerial page
-unsigned long serialMillis = 0;            // Millis at the last webSerial update
-const long dashPeriod = 3000;              // Interval at which to update the dashboard page
-unsigned long dashMillis = 0;              // Millis at the last dashboard update
+const long ledPeriod = 200;                 // Interval at which to blink (milliseconds)
+unsigned long ledMillis = 0;                // Millis at the last led state change
+const long serialPeriod = 5000;             // Interval at which to update the webSerial page
+unsigned long serialMillis = 0;             // Millis at the last webSerial update
+const long dashPeriod = 3000;               // Interval at which to update the dashboard page
+unsigned long dashMillis = 0;               // Millis at the last dashboard update
 
 // Red button
 bool hitOnceOn = false;                     // Toggle state for a single hit, to be read by other modules
 bool hitTwiceOn = false;                    // Toggle state for a dual hit, to be read by other modules
 bool hitThriceOn = false;                   // Toggle state for a triple hit, to be read by other modules
+enum HitState {START, HIT_ONCE, HIT_TWICE, HIT_THRICE, PAUSE};
+HitState hitState = START;
 unsigned long int hitDelayBefore = 100000;  // Delay in micros before finish a detection (debouncing)
 unsigned long int hitDelayDuring = 500000;  // Delay in micros before completing an interaction
 unsigned long int hitDelayAfter = 1500000;  // Delay in micross before accepting a new interaction
 volatile bool hitButton = false;            // Flag to be set by the interrupt and cleared in loop()
 volatile unsigned long hitMicros;           // Set by the interrupt only
-enum HitState {START, HIT_ONCE, HIT_TWICE, HIT_THRICE, PAUSE};
-HitState hitState = START;
-
-// Function prototypes implemented below
-void printToggleSwitches();
-void handlePush();
 
 
 PoleFirmwareBase::PoleFirmwareBase()
 {
+  displayText = "Pole firmware started!";
 }
 
 void PoleFirmwareBase::setup()
@@ -100,7 +96,34 @@ void PoleFirmwareBase::setup()
     (*server).begin();
 }
 
-// All function calls should be non-blocking (do not use the delay() function)
+bool PoleFirmwareBase::getHitOnce() {
+  return hitOnceOn;
+}
+
+bool PoleFirmwareBase::getHitTwice() {
+  return hitTwiceOn;
+}
+
+bool PoleFirmwareBase::getHitThrice() {
+  return hitThriceOn;
+}
+
+void PoleFirmwareBase::resetHitOnce() {
+  hitOnceOn = false;
+}
+
+void PoleFirmwareBase::resetHitTwice() {
+  hitTwiceOn = false;
+}
+
+void PoleFirmwareBase::resetHitThrice() {
+  hitThriceOn = false;
+}
+
+void PoleFirmwareBase::setDisplayText(const char *newText) {
+  displayText = newText;
+}
+
 void PoleFirmwareBase::sense_loop() {
 
   unsigned long currentMillis = millis();
@@ -132,32 +155,31 @@ void PoleFirmwareBase::sense_loop() {
     if (hitButton && diffMicros >= hitDelayBefore) {
       hitButton = false;
       hitState = HIT_ONCE;
+      webSerial.println("--> HIT_ONCE");
       Serial.println("--> HIT_ONCE");
     }
   } else if (hitState == HIT_ONCE) {
     if (hitButton && diffMicros >= hitDelayBefore) {
       hitButton = false;
       hitState = HIT_TWICE;
+      webSerial.println("--> HIT_TWICE");
       Serial.println("--> HIT_TWICE");
     } else if (diffMicros >= hitDelayDuring) {
       hitOnceOn = !hitOnceOn;
       hitState = PAUSE;
       printToggleSwitches();
-      displayText = "HIT ONCE!";
-      webSerial.println(displayText);
     }
   } else if (hitState == HIT_TWICE) {
     if (hitButton && diffMicros >= hitDelayBefore) {
       hitButton = false;
       hitState = HIT_THRICE;
+      webSerial.println("--> HIT_THRICE");
       Serial.println("--> HIT_THRICE");
     } else if (diffMicros >= hitDelayDuring) {
       hitButton = false;
       hitTwiceOn = !hitTwiceOn;
       hitState = PAUSE;
       printToggleSwitches();
-      displayText = "HIT TWICE!";
-      webSerial.println(displayText);
     }
   } else if (hitState == HIT_THRICE) {
     if (diffMicros >= hitDelayDuring) {
@@ -165,11 +187,10 @@ void PoleFirmwareBase::sense_loop() {
       hitThriceOn = !hitThriceOn;
       hitState = PAUSE;
       printToggleSwitches();
-      displayText = "HIT THRICE!";
-      webSerial.println(displayText);
     }
   } else {  // hitState == PAUSE
     if (hitButton) {
+      webSerial.println("\nTake it easy...");
       Serial.println("\nTake it easy...");
       hitButton = false;
     } else if (diffMicros >= hitDelayAfter) {
@@ -183,20 +204,26 @@ void PoleFirmwareBase::act_loop() {
   drawScrollingText(); 
 }
 
-void printToggleSwitches() {
-  Serial.print("hitOnce:    ");
-  Serial.println((hitOnceOn) ? "on" : "off");
-  Serial.print("hitTwice:   ");
-  Serial.println((hitTwiceOn) ? "on" : "off");
-  Serial.print("hitThrice:  ");
-  Serial.println((hitThriceOn) ? "on" : "off");
-}
-
-void handlePush() {
+void PoleFirmwareBase::handlePush() {
   cli();                            // disable interrupts for making the value changes below in an atomic way
   if (!hitButton) {
     hitMicros = micros();           // the micros() value can be reliably read on entry of an ISR
     hitButton = true;
   }
   sei();
+}
+
+void PoleFirmwareBase::printToggleSwitches() {
+  Serial.print("hitOnce:    ");
+  Serial.println((hitOnceOn) ? "on" : "off");
+  Serial.print("hitTwice:   ");
+  Serial.println((hitTwiceOn) ? "on" : "off");
+  Serial.print("hitThrice:  ");
+  Serial.println((hitThriceOn) ? "on" : "off");
+  webSerial.print("hitOnce:    ");
+  webSerial.println((hitOnceOn) ? "on" : "off");
+  webSerial.print("hitTwice:   ");
+  webSerial.println((hitTwiceOn) ? "on" : "off");
+  webSerial.print("hitThrice:  ");
+  webSerial.println((hitThriceOn) ? "on" : "off");
 }

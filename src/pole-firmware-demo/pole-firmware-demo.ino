@@ -38,9 +38,21 @@ void setup() {
 
 // All function calls should be non-blocking (do not use the delay() function)
 void loop() {
+  // Update sensor readings
   pf.sense_loop();
 
-  // Add demo logic
+  // Add logic to change the demonstrator state
+  if (pf.getHitOnce()) {
+    pf.setDisplayText("HIT ONCE!");
+    pf.resetHitOnce();
+  } else if (pf.getHitTwice()) {
+    pf.setDisplayText("HIT TWICE!");
+    pf.resetHitTwice();
+  } else if (pf.getHitThrice()) {
+    pf.setDisplayText("HIT THRICE!");
+    pf.resetHitThrice();
+  }
 
+  // Run actuators on new demonstrator state
   pf.act_loop();
 }
