@@ -8,6 +8,8 @@
 
 using namespace dash;
 
+enum HitState : int {START, HIT_ONCE, HIT_TWICE, HIT_THRICE, PAUSE};
+
 
 class PoleFirmwareBase {
     private:
@@ -27,6 +29,9 @@ class PoleFirmwareBase {
         // ToDo: replace fake temp/humidity with red button toggle states and PIR readouts
         TemperatureCard<float> temperature = TemperatureCard(dashboard, "Temperature");
         HumidityCard<float> humidity = HumidityCard(dashboard, "humidity");
+        GenericCard<int> redButtonCard = GenericCard<int>(dashboard, "Red Button");
+        GenericCard<bool> pirFrontCard = GenericCard<bool>(dashboard, "PIR front");
+        GenericCard<bool> pirBackCard = GenericCard<bool>(dashboard, "PIR back");
 
         PoleFirmwareBase();
         void setup();

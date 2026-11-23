@@ -63,7 +63,6 @@ unsigned long dashMillis = 0;               // Millis at the last dashboard upda
 bool hitOnceOn = false;                     // Toggle state for a single hit, to be read by other modules
 bool hitTwiceOn = false;                    // Toggle state for a dual hit, to be read by other modules
 bool hitThriceOn = false;                   // Toggle state for a triple hit, to be read by other modules
-enum HitState {START, HIT_ONCE, HIT_TWICE, HIT_THRICE, PAUSE};
 HitState hitState = START;
 unsigned long int hitDelayBefore = 100000;  // Delay in micros before finish a detection (debouncing)
 unsigned long int hitDelayDuring = 500000;  // Delay in micros before completing an interaction
@@ -142,14 +141,6 @@ void PoleFirmwareBase::sense_loop() {
     serialMillis = currentMillis;
   }
 
-  // Update dashboard cards
-  if (currentMillis - dashMillis >= dashPeriod) {
-    temperature.setValue((int)random(0, 50));
-    humidity.setValue((int)random(0, 100));
-    dashboard.sendUpdates();
-    dashMillis = currentMillis;
-  }
-
   unsigned long int diffMicros = micros() - hitMicros;
   if (hitState == START) {
     if (hitButton && diffMicros >= hitDelayBefore) {
@@ -196,6 +187,17 @@ void PoleFirmwareBase::sense_loop() {
     } else if (diffMicros >= hitDelayAfter) {
       hitState = START;
     }
+  }
+
+  // Update dashboard cards
+  if (currentMillis - dashMillis >= dashPeriod) {
+    temperature.setValue((int)random(0, 50));
+    humidity.setValue((int)random(0, 100));
+    redButtonCard.setValue(hitState);
+    pirFrontCard.setValue(digitalRead(frontPIR));
+    pirBackCard.setValue(digitalRead(backPIR));
+    dashboard.sendUpdates();
+    dashMillis = currentMillis;
   }
 }
 
